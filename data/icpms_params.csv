@@ -1,0 +1,7 @@
+Variable,Value
+cone,nickel
+RF power,1500 W
+nebulizer gas flow rate,0.6 L min^-1^
+plasma gas flow rate,12 L min^-1^
+auxiliary gas flow rate,1 L min^-1^
+integration time,6 s

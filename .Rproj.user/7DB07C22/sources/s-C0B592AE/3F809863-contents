@@ -1,0 +1,44 @@
+library(tidyverse)
+library(MASS)
+library(caret)
+
+
+data <- readr::read_csv(here::here("data", "data_parsed.csv")) %>%
+  dplyr::mutate(dplyr::across(
+    c(region, sex),
+    .fns = as_factor
+  ))  %>%
+  dplyr::select(region, ba_ca:fe_ca)
+
+
+# Split the data into training (80%) and test set (20%)
+set.seed(123)
+training.samples <- data$region %>%
+  createDataPartition(p = 0.8, list = FALSE)
+train.data <- data[training.samples, ]
+test.data <- data[-training.samples, ]
+
+
+preproc.param <- train.data %>% 
+  preProcess(method = c("center", "scale"))
+# Transform the data using the estimated parameters
+train.transformed <- preproc.param %>% predict(train.data)
+test.transformed <- preproc.param %>% predict(test.data)
+
+# Fit the model
+model <- lda(region~., data = train.transformed)
+# Make predictions
+predictions <- model %>% predict(test.transformed)
+# Model accuracy
+mean(predictions$class==test.transformed$region)
+
+predictions <- model %>% predict(test.transformed)
+# Predicted classes
+head(predictions$class, 6)
+# Predicted probabilities of class memebership.
+head(predictions$posterior, 6) 
+# Linear discriminants
+head(predictions$x, 3) 
+
+
+mean(predictions$class==test.transformed$region)

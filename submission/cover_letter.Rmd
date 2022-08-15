@@ -1,0 +1,45 @@
+---
+output:
+  bookdown::pdf_document2:
+    keep_tex: true
+    toc: false
+  bookdown::word_document2:
+    toc: false
+geometry: margin=1.0in
+font-size: 12pt
+header-includes:
+  - \usepackage{helvet}
+  - \renewcommand*\familydefault{\sfdefault}
+bibliography: references.bib
+csl: estuaries_and_coasts.csl
+---
+
+```{r params, echo = FALSE, include = FALSE, message = FALSE}
+
+journal_name <- "Estuarine, Coastal and Shelf Science"
+
+```
+
+
+Dear Editor,
+
+Herewith I am submitting an article titled “Fin-spine microchemistry discriminates regional stocks of Caspian Sea starry sturgeon” for consideration for publication in `r journal_name`. Calcified structures of fish have long been used as tools to study fish life histories. Structures such as otoliths and fin spines grow in incremental rings much like tree rings, thereby recording growth and age information. Importantly, they also incorporate many trace and microelements in proportion to their concentrations in surrounding waters. This has allowed fisheries scientists to unravel the complex lives of fish with relatively small sample sizes, which can be important in poorly studied regions that have limited funding for extensive field studies.
+
+Otoliths are considered the gold standard for such studies because they are metabolically inert, thus providing complete life-history records. However, fish are sacrificed to remove otoliths, which is undesirable for threatened or endangered species. Therefore, other structures, such as pectoral fin spines, have been proposed as non-lethal alternatives to otoliths for life-history studies that rely on microchemistry [@avigliano2019].
+
+Our study investigated fin-spine microchemistry as a non-lethal tool for discriminating stocks of starry sturgeon (*Acipenser stellatus*), which is a critically endangered species in the Caspian Sea. The northern and southern basins of the Caspian Sea have stark physical differences, including depth and salinity. We hypothesized that starry sturgeon from the northern and southern Caspian Sea would have distinct fin-spine microchemistries reflecting environmental differences, thereby allowing us to use this technique for stock discrimination.
+
+We found that fin-spine microchemistry varied significantly between north and south, and cross-validated discrimination showed a high degree of correct regional classification. Our results also revealed that fin-spine microchemistry varied not only for elements indicative of ambient water conditions, but also those associated with fish physiology. Therefore, starry sturgeon in the northern and southern Caspian Sea likely have different life histories in addition to being geographically separated. We also found evidence of inter-sex life-history differences.
+
+This paper demonstrates that fin-spine microchemistry represents a valuable and non-lethal alternative to otoliths as a tool for stock discrimination in starry sturgeon. This is especially valuable considering the precarious position of sturgeon stocks in highly impacted systems with little management funding. Additionally, we revealed important baseline information about the life history of this imperiled fish species, which warrants further study. We also briefly consider the pathways by which our elements of interest may travel from the environment to the calcified structures of fish [@thomas2019]. This is an oft-neglected dimension of such papers, even though these pathways are usually not well understood but are critical to the interpretation of results. Finally, we discuss some of the steps required to systematically address knowledge gaps that hold back the potential of microchemical techniques as conservation tools.  
+
+In conclusion, I believe that this paper makes a significant contribution to an important but under-studied topic. The results reveal new life-history information in a commercially and ecologically valuable fish species and demonstrate great potential for use in this system and elsewhere.  On behalf of my co-authors, I hope you will find the manuscript suitably interesting to warrant peer review.
+
+Sincerely,
+
+Theodore Hermann
+
+**References**
+
+<div id="refs"></div>
+

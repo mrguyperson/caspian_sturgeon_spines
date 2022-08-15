@@ -1,0 +1,20 @@
+---
+output:
+  bookdown::pdf_document2:
+    keep_tex: true
+    toc: false
+  bookdown::word_document2:
+    toc: false
+geometry: margin=1.0in
+font-size: 12pt
+header-includes:
+  - \usepackage{helvet}
+  - \renewcommand*\familydefault{\sfdefault}
+---
+
+# Highlights {-}
+* A suite of useful microelements revealed in starry sturgeon fin spines 
+* Sturgeon spine microchemistry differs significantly in north and south Caspian Sea
+* Microchemistry suggests regional environmental and physiological differences
+* Life-history differences imply unique sturgeon stocks; require management actions
+* Fin-spine microchemistry can non-lethally discriminate sturgeon stocks
