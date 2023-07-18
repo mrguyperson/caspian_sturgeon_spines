@@ -124,7 +124,7 @@ ba_sex_sig <- ba %>%
   signif(., digits = 2)
 
 male_male_diff <- ba %>% 
-  dplyr::filter((term == "region:sex") &(p.adj < 0.05)) %>% 
+  dplyr::filter((term == "region:sex") & (p.adj < 0.05)) %>% 
   dplyr::filter((group1 == "south:male") & (group2 == "north:male")) %>% 
   dplyr::pull(p.adj) %>% 
   signif(., digits = 2)
