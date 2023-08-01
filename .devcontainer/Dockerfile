@@ -1,8 +1,11 @@
-FROM rocker/geospatial:4.2
+FROM rocker/geospatial:4.1
+
+RUN echo msttcorefonts msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
 
 RUN apt update && \
     apt install -y --no-install-recommends python3-pip \
-    htop
+    htop \
+    ttf-mscorefonts-installer
 
 RUN pip3 install radian
 
@@ -11,17 +14,14 @@ RUN install2.r languageserver \
     jsonlite \
     here \
     tictoc \
-    R.utils \
-    tools \
-    future \
-    furrr \
     viridis \
-    patchwork \
     microbenchmark \
     targets \
     tarchetypes \
     ggmap \
     ggpubr \
+    ggsignif \
+    rstatix \
     tidymodels \
     tidytext \
     vegan \
@@ -32,8 +32,11 @@ RUN install2.r languageserver \
     dendextend \
     ggdendro \
     cluster \
-    factoextra
-
+    factoextra \
+    tinytex \
+    Hmisc \
+    raster \
+    rnaturalearthhires
 
 # RUN R -e '''
 #         install.packages("nanonext", repos = "https://shikokuchuo.r-universe.dev")

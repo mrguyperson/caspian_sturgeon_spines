@@ -1,1 +1,4 @@
 *.RDS
+*.shp
+*.tiff
+map_data/*
