@@ -1,0 +1,136 @@
+
+R version 4.1.3 (2022-03-10) -- "One Push-Up"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[1] "Using custom .Rprofile ..."
+[1] "Setting max print lines to 1000."
+[Previously saved workspace restored]
+
+> #!/usr/bin/env Rscript
+> 
+> # This is a helper script to run the pipeline.
+> # Choose how to execute the pipeline below.
+> # See https://books.ropensci.org/targets/hpc.html
+> # to learn about your options.
+> 
+> targets::tar_make()
+[1] "Using custom .Rprofile ..."
+[1] "Setting max print lines to 1000."
+here() starts at /workspaces/caspian_sturgeon_spines
+✔ skip target journal_name
+✔ skip target ne_world
+✔ skip target supplement_path
+✔ skip target raw_data_path
+✔ skip target downloaded_zips_url
+✔ skip target fda_model
+✔ skip target response_to_reviewers
+✔ skip target iran_clipped1
+✔ skip target iran_clipped2
+✔ skip target russia_clipped
+✔ skip target supplement
+✔ skip target raw_data
+✔ skip target downloaded_zips
+✔ skip target cleaned_raw_data
+✔ skip target raw_elem_names
+✔ skip target lakes_shp
+✔ skip target lakes_europe_shp
+✔ skip target rivers_shp
+✔ skip target geotiff
+✔ skip target rivers_europe_shp
+✔ skip target data_parsed
+✔ skip target formatted_element_list
+✔ skip target lakes
+✔ skip target lakes_europe
+✔ skip target rivers
+✔ skip target depth_raster
+✔ skip target rivers_europe
+✔ skip target anova_data
+✔ skip target fish_data
+✔ skip target depth
+✔ skip target fda_recipe
+✔ skip target elements
+✔ skip target trans_anova
+✔ skip target shapiro_res
+✔ skip target anova_data_clean_names
+✔ skip target folds
+✔ skip target length_u_test_res
+✔ skip target fish_table
+✔ skip target total_fish
+✔ skip target age_u_test_res
+• start target map
+Scale on map varies by more than 10%, scale bar may be inaccurate
+• built target map
+✔ skip target fda_workflow
+✔ skip target srh
+✔ skip target anova_output
+✔ skip target trans_anova_clean_names
+✔ skip target shapiro_res_trans
+✔ skip target tukey
+✔ skip target tukey_full
+✔ skip target fda_res
+✔ skip target post_hoc_elements
+✔ skip target srh_fancy_names
+✔ skip target anova_table
+✔ skip target anova_bar_chart
+✔ skip target fda_metrics
+✔ skip target dunn_test_res
+✔ skip target sig_elements
+✔ skip target formatted_srh_table
+• start target srh_bar_chart
+• built target srh_bar_chart
+✔ skip target fda_roc_auc
+✔ skip target fda_accuracy
+✔ skip target sig_elems_formatted
+✔ skip target diff_in_sig_elem
+✔ skip target pca_data
+✔ skip target north_higher_mean_elem
+✔ skip target south_higher_mean_elem
+✔ skip target pca_recipe
+✔ skip target north_higher_formatted
+✔ skip target south_higher_formatted
+✔ skip target pca_prep
+✔ skip target pc_vars
+✔ skip target pca_juiced
+✔ skip target components_contr_fig
+✔ skip target princ_components
+✔ skip target centroids
+✔ skip target pca_distance
+✔ skip target pca_figure
+✔ skip target adonis_table
+✔ skip target full_pca_fig
+• start target manuscript
+Quitting from lines 354-359 (manuscript.Rmd) 
+✖ error target manuscript
+• end pipeline: 24.592 seconds
+Error in tar_throw_run(target$metrics$error) : 
+  R: cache resources exhausted `' @ error/cache.c/OpenPixelCache/4083
+In addition: There were 50 or more warnings (use warnings() to see the first 50)
+Error in `tar_throw_run()`:
+! callr subprocess failed: R: cache resources exhausted `' @ error/cache.c/OpenPixelCache/4083
+Visit https://books.ropensci.org/targets/debugging.html for debugging advice.
+Backtrace:
+    ▆
+ 1. └─targets::tar_make()
+ 2.   └─targets:::callr_outer(...)
+ 3.     └─base::tryCatch(...)
+ 4.       └─base tryCatchList(expr, classes, parentenv, handlers)
+ 5.         └─base tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 6.           └─value[[3L]](cond)
+ 7.             └─targets::tar_throw_run(...)
+ 8.               └─rlang::abort(...)
+Execution halted

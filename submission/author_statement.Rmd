@@ -1,0 +1,29 @@
+---
+output:
+  bookdown::pdf_document2:
+    keep_tex: true
+    toc: false
+  bookdown::word_document2:
+    toc: false
+geometry: margin=1.0in
+font-size: 12pt
+header-includes:
+  - \usepackage{helvet}
+  - \renewcommand*\familydefault{\sfdefault}
+  - \usepackage{setspace}
+  - \doublespacing
+bibliography: references.bib
+csl: https://www.zotero.org/styles/estuarine-coastal-and-shelf-science
+---
+
+# CRediT authorship contribution statement {-}
+
+Shima Bakhshalizadeh: conceptualization, sample collection and preparation, data evaluation, statistical analysis, writing - original draft, writing - review & editing, visualization, funding acquisition.  
+
+Botagoz Murasovna Nasibulina: conceptualization, sample collection and preparation, funding acquisition, writing - original draft  
+
+Tatyana Fedorovna Kurochkina: sample collection and preparation, visualization, writing - review & editing.  
+
+Attala Muhaysin Ali: conceptualization, writing - original draft, writing - review & editing.  
+
+Theodore Hermann: conceptualization, statistical analysis, writing - original draft, writing - review & editing, visualization.

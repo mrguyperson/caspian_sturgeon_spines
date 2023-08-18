@@ -2,3 +2,5 @@
 *.tex
 *.docx
 *.png
+*.log
+manuscript_files/*

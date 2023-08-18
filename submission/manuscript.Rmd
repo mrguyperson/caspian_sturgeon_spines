@@ -1,8 +1,8 @@
 ---
 output:
-  bookdown::pdf_document2:
-    keep_tex: true
-    toc: false
+  # bookdown::pdf_document2:
+  #   keep_tex: true
+  #   toc: false
   bookdown::word_document2:
     toc: false
 geometry: margin=1.0in
@@ -15,16 +15,13 @@ header-includes:
   - \usepackage[left]{lineno}
   - \linenumbers
 bibliography: references.bib
-csl: estuaries_and_coasts.csl
+csl: https://www.zotero.org/styles/estuarine-coastal-and-shelf-science
 ---
 ```{r, include=FALSE, message=FALSE}
-library(tidyverse)
-library(knitr)
-library(broom)
-library(here)
-library(kableExtra)
+library(targets)
 options(knitr.kable.NA = '')
 options(tinytex.verbose = TRUE)
+# knitr::opts_knit$set(root.dir = dirname(here::here()))
 ```
 
 ```{r, include=FALSE, message=FALSE}
@@ -60,85 +57,81 @@ Dr. Theodore W. Hermann, Institute of Marine Sciences–Fisheries Collaborative 
 # Abstract (250 words) {-}
 
 ```{r raw-data, echo=FALSE, message=FALSE, include=FALSE}
-raw_path <- here::here("data", "spine_chem.csv")
-
-raw_data <- read_csv(raw_path)
-
-raw_elem_names <- raw_data %>% 
-  dplyr::select(Ca:Fe) %>% 
-  names() %>% 
-  sort()
-
-most_raw_elems <- raw_elem_names[1:length(raw_elem_names) - 1]
-most_raw_elems_formatted <- paste(most_raw_elems, collapse = ", ")
-
-last_raw_elem <- raw_elem_names[length(raw_elem_names)]
-
+tar_load(formatted_element_list)
 ```
 
 
-```{r lda-res, echo=FALSE, message=FALSE, include=FALSE}
+```{r fda-res, echo=FALSE, message=FALSE, include=FALSE}
 
-lda_res <- readRDS(here::here('data', 'lda.RDS'))
+tar_load(fda_accuracy)
+tar_load(fda_roc_auc)
 
-lda_accuracy <- lda_res %>% 
-  dplyr::filter(.metric == "accuracy") %>% 
-  dplyr::pull(.estimate) * 100
 
 ```
 
 ```{r anova-data, message = FALSE, echo = FALSE, include = FALSE}
-anova_res <- readRDS(here::here("data", "anova_output_data.RDS"))
+# anova_res <- readRDS(here::here("data", "anova_output_data.RDS"))
+# tar_load(srh)
+# tar_load(sig_elements)
+# tar_load(diff_in_sig_elem)
+tar_load(sig_elems_formatted)
+tar_load(south_higher_formatted)
+tar_load(north_higher_formatted)
+# sig_reg_res <- srh %>% 
+#   dplyr::filter((term == "region") & (p.value < 0.05))
 
-sig_reg_res <- anova_res %>% 
-  dplyr::filter((term == "region") & (p.adj < 0.05))
+# sig_reg_elems <- sig_reg_res %>% 
+#   dplyr::pull(element)
 
-sig_reg_elems <- sig_reg_res %>% 
-  dplyr::pull(element)
+# sig_elems_formatted <- sentence_format_for_list(sig_elements)
 
-most_elems <- sig_reg_elems[1:length(sig_reg_elems) - 1]
-last_elem <- sig_reg_elems[length(sig_reg_elems)]
+# south_higher <- diff_in_sig_elem %>% 
+#   dplyr::filter(-delta_from_south < 0) %>% 
+#   dplyr::pull(name)
 
-most_elems_formatted <- paste(most_elems, collapse = ", ")
+# north_higher <- diff_in_sig_elem %>% 
+#   dplyr::filter(delta_from_south > 0) %>% 
+#   dplyr::pull(name)
 
-south_higher <- sig_reg_res %>% 
-  dplyr::filter(estimate < 0) %>% 
-  dplyr::pull(element)
+# north_higher_formatted <- sentence_format_for_list(north_higher)
+# south_higher_formatted <- sentence_format_for_list(south_higher)
 
-north_higher <- sig_reg_res %>% 
-  dplyr::filter(estimate > 0) %>% 
-  dplyr::pull(element)
+# ba <- anova_res %>% 
+#   dplyr::filter(element == "Ba/Ca")
+# ba_sex_sig <- ba %>%
+#   dplyr::filter(term == "sex") %>% 
+#   pull(p.adj) %>% 
+#   signif(., digits = 2)
 
-north_most <- north_higher[1:length(north_higher) - 1]
-north_last <- north_higher[length(north_higher)]
+tar_load(dunn_test_res)
 
-north_most_formatted <- paste(north_most, collapse = ", ")
-
-south_formatted <- paste(south_higher, collapse = " and ")
-
-ba <- anova_res %>% 
-  dplyr::filter(element == "Ba/Ca")
-ba_sex_sig <- ba %>%
-  dplyr::filter(term == "sex") %>% 
-  pull(p.adj) %>% 
+male_male_diff <- dunn_test_res %>%
+  dplyr::filter(grepl("_male", group1), grepl("_male", group2)) %>%
+  dplyr::pull(p.adj) %>%
   signif(., digits = 2)
 
-male_male_diff <- ba %>% 
-  dplyr::filter((term == "region:sex") & (p.adj < 0.05)) %>% 
-  dplyr::filter((group1 == "south:male") & (group2 == "north:male")) %>% 
+south_diff <- dunn_test_res %>% 
+  dplyr::filter((group2 == "south_male") & (group1 == "south_female")) %>% 
   dplyr::pull(p.adj) %>% 
   signif(., digits = 2)
-
-south_diff <- ba %>% 
-  dplyr::filter((term == "region:sex") &(p.adj < 0.05)) %>% 
-  dplyr::filter((group1 == "south:male") & (group2 == "south:female")) %>% 
-  dplyr::pull(p.adj) %>% 
-  signif(., digits = 2)
-
-
 ```
 
-Chemical markers in otoliths have been used to assess the stock structure of many marine fishes, but these natural markers have yet to be widely evaluated in the spines of sturgeon fishes in the Caspian Sea, which has five endangered sturgeon species. We used inductively coupled–plasma mass spectrometry to quantify `r most_raw_elems_formatted` and `r last_raw_elem` in pectoral fin spines of starry sturgeon (*Acipenser stellatus*) in the northern and southern Caspian Sea, where depth and temperature vary from north to south. Fin spines from fish collected in the northern vs. southern Caspian Sea differed significantly in `r most_elems_formatted` and `r last_elem` (ANOVA, p < 0.05). Principal component analysis suggested distinct north/south groups when considering all elements in ratio to calcium. The centroids of these regional groups differed significantly (PERMANOVA, p < 0.05). Linear discriminant analysis classified `r lda_accuracy`% of fish into their correct regions using all significant element-to-calcium ratios. These results suggest that individuals in certain regions share common environmental histories and may represent unique stocks in the Caspian Sea. Moreover, the findings suggest that pectoral fin spine chemistry can be used to identify stocks of starry sturgeon, thus providing a non-lethal approach to elucidating life-history details that are critical to the comprehensive management of sturgeon resources.
+Chemical markers in otoliths have been used to assess the stock structure of many marine fishes, 
+but these natural markers have yet to be widely evaluated in the spines of sturgeon fishes in the Caspian Sea, 
+which has six endangered sturgeon species. 
+We used inductively coupled–plasma mass spectrometry to quantify `r formatted_element_list` in pectoral 
+fin spines of starry sturgeon (*Acipenser stellatus*) in the northern and southern Caspian Sea, 
+where depth, salinity, and temperature vary from north to south. 
+Fin spines showed significant regional differences in 
+`r sig_elems_formatted` (Scheirer–Ray–Hare test, p < 0.05). 
+Principal component analysis indicated distinct north/south groups when considering all elements in ratio to calcium. 
+The centroids of these regional groups differed significantly (PERMANOVA, p < 0.05). 
+Flexible discriminant analysis classified `r fda_accuracy`% of fish into their correct regions using all 
+element-to-calcium ratios. These results suggest that individuals in different regions share common lifetime
+environmental histories and may represent unique stocks in the Caspian Sea. 
+Moreover, the findings suggest that pectoral fin-spine microchemistry can be used to identify stocks of starry 
+sturgeon, thus providing a non-lethal approach to elucidating life-history details that are critical to the 
+comprehensive management of sturgeon resources.
 
 **Keywords**: microchemistry; fin spine; sturgeon; conservation; fisheries; Caspian Sea
 
@@ -148,23 +141,80 @@ Chemical markers in otoliths have been used to assess the stock structure of man
 
 # Introduction
 
-Anthropogenic activities threaten global fish diversity, especially among large-bodied fishes that rely on freshwater for all or part of their life histories [@allan2005; @arthington2016; @he2017; @stone2007]. Sturgeons are an ancient group of large anadromous fishes, most of which are listed as threatened or endangered by the International Union for Conservation of Nature (IUCN) due to overfishing and loss of habitat [@bakhshalizadeh2015; @lukyanenko1999; @pourkazemi2006; @ruban2019]. Sturgeons are highly mobile and exploit diverse habitats, which makes it challenging to delineate their stocks (i.e., distinct subpopulations) [@beamesderfer1997; @gross2002; @munro2007; @whitmore2018]. Moreover, sturgeon spatial distributions can be complex and extensive, varying by sex, life stage, and season [@bakhshalizadeh2017; @kahn2019; @whitmore2018a]. A clear understanding of basic life-history details, especially movement patterns, is critical for sturgeon conservation and management in the face of numerous anthropogenic pressures [@bakhshalizadeh2017; @bakhshalizadeh2012; @pikitch2005; @sulak2002].  
+Anthropogenic activities threaten global fish diversity, especially among large-bodied fishes that rely on freshwater 
+for all or part of their life histories [@allan2005; @arthington2016; @he2017; @stone2007]. 
+Sturgeons are an ancient group of large anadromous fishes, most of which are listed as threatened or endangered by the 
+International Union for Conservation of Nature (IUCN) due to overfishing and loss of 
+habitat [@bakhshalizadeh2015; @lukyanenko1999; @pourkazemi2006; @ruban2019]. 
+Sturgeons are highly mobile and exploit diverse habitats, which makes it challenging to delineate their 
+stocks (i.e., distinct subpopulations) [@beamesderfer1997; @gross2002; @munro2007; @whitmore2018]. 
+Moreover, sturgeon spatial distributions can be complex and extensive, varying by sex, life stage, and 
+season [@bakhshalizadeh2017; @kahn2019; @whitmore2018a]. A clear understanding of basic life-history details, especially 
+movement patterns, is critical for sturgeon conservation and management in the face of numerous 
+anthropogenic pressures [@bakhshalizadeh2017; @bakhshalizadeh2012; @pikitch2005; @sulak2002].  
 
 
 
-In the Caspian Sea (**Fig. \@ref(fig:map)**), the world’s largest inland body of water, climate change, habitat degradation, and fishing pressures threaten important fish stocks, especially those of sturgeons [@barannik2004; @lukyanenko1999; @ruban2019]. In many cases, sturgeon migrate through multinational waters, where regulation is not straightforward and fish are exposed to trawling, purse-seine fisheries and gill-nets by illegal fishermen [@bakhshalizadeh2017; @friedrich2018; @friedrich2019]. Sturgeon conservation and management in the Caspian Sea requires an understanding of migration patterns, site fidelity, and connectivity within and among stocks [@bakhshalizadeh2021; @bakhshalizadeh2015; @bakhshalizadeh2011; @mcintyre2015].
+In the Caspian Sea (**Fig. \@ref(fig:map)**), the world’s largest inland body of water, climate change, habitat degradation, 
+and fishing pressures threaten important fish stocks, especially those of sturgeons [@barannik2004; @lukyanenko1999; @ruban2019]. 
+In many cases, sturgeon migrate through multinational waters, where regulation is not straightforward and fish are exposed to illegal
+trawling, purse-seine fisheries and gill-nets [@bakhshalizadeh2017; @friedrich2018; @friedrich2019]. 
+Sturgeon conservation and management in the Caspian Sea requires an understanding of migration patterns, site fidelity, and 
+connectivity within and among stocks [@bakhshalizadeh2021; @bakhshalizadeh2015; @bakhshalizadeh2011; @mcintyre2015].
 
-```{r label = map, echo = FALSE, fig.cap = "The study region, showing neighboring countries, depth profile of the Caspian Sea, and sampling areas (thick red shoreline).", out.width = '100%'}
-
-knitr::include_graphics(knitr::plot_crop(here("figures", "map.jpg")))
+```{r label = map, echo = FALSE, warning = FALSE, fig.cap = "The study region, showing neighboring countries, depth profile of the Caspian Sea, and sampling areas (thick red shoreline).", out.width = '100%'}
+tar_load(map)
+knitr::include_graphics(knitr::plot_crop(map))
 
 ```
 
-Quantifying the dispersal of stocks is essential to further our understanding of stock dynamics. Tagging and telemetry techniques are valuable for elucidating movement behavior in sturgeons but can be challenging to use in the youngest fish classes due to their small body size [@carrera-garcia2017]. By contrast, natural tags allow long-term stock-identification studies across individuals of all sizes [@allen2009; @arai2002; @campana1999; @chen2019]. Calcified structures have been used as sources of natural tags in fisheries science for decades because they incorporate various trace and microelements from the ambient environment [@campana1999; @kerr2014; @tzadik2017]. Otolith microchemistry is the most widely used tool for studying natural tags because otoliths are metabolically inert [@campana1999; @thomas2019] and thus preserve life-long records of environmental exposure. However, fish are killed in the process of removing otoliths, which is clearly undesirable when studying threatened species such as sturgeons.
+Quantifying the dispersal of stocks is essential to further our understanding of stock dynamics. 
+Tagging and telemetry techniques are valuable for elucidating movement behavior in sturgeons but can be challenging to use in 
+the youngest fish classes due to their small body size [@carrera-garcia2017]. 
+By contrast, natural tags allow long-term stock-identification studies across individuals of all 
+sizes [@allen2009; @arai2002; @campana1999; @chen2019]. 
+Calcified structures have been used as sources of natural tags in fisheries science for decades because they incorporate various 
+trace and microelements from the ambient environment [@campana1999; @kerr2014; @tzadik2017]. 
+Otolith microchemistry is the most widely used tool for studying natural tags because otoliths are metabolically 
+inert [@campana1999; @thomas2019] and thus preserve life-long records of environmental exposure. 
+However, fish are killed in the process of removing otoliths, which is clearly undesirable when studying threatened species 
+such as sturgeons.
 
-Fin rays and spines provide a valuable non-lethal alternative to otoliths for investigating natural tags of habitat use [@allen2009; @arai2002; @avigliano2019; @bakhshalizadeh2021a; @cadrin2005; @clarke2007; @kerr2014; @phelps2012; @tzadik2017]. The pectoral fin spines of sturgeon originate from cells within the dermis along more than half the anterior edge of the pectoral fin and are reinforced with hydroxyapatite (calcium phosphate) and collagen [@bakhshalizadeh2019; @bakhshalizadeh2013; @bakhshalizadeh2013a; @loewen2016; @tzadik2017]. Like otoliths, sturgeon pectoral spines grow in characteristic bands that can be used to study age and life history of individuals [@bakhshalizadeh2011; @pollock2015]. Although pectoral spines are not metabolically inert like otoliths, their margins are stable enough to elucidate habitat use and stocks based on natural tags [@avigliano2019; @clarke2007; @tzadik2017].
+Fin rays and spines provide a valuable non-lethal alternative to otoliths for investigating natural tags of 
+habitat use [@allen2009; @arai2002; @avigliano2019; @bakhshalizadeh2021a; @cadrin2005; @clarke2007; @kerr2014; @phelps2012; @tzadik2017]. 
+The pectoral fin spines of sturgeon originate from cells within the dermis along more than half the anterior edge of the pectoral 
+fin and are reinforced with hydroxyapatite (calcium phosphate) and 
+collagen [@bakhshalizadeh2019; @bakhshalizadeh2013; @bakhshalizadeh2013a; @loewen2016; @tzadik2017]. 
+Like otoliths, sturgeon pectoral spines grow in characteristic bands that can be used to study age and life history of 
+individuals [@bakhshalizadeh2011; @pollock2015]. 
+Although pectoral spines are not metabolically inert like otoliths, their margins are stable enough to elucidate habitat use and stocks 
+based on natural tags [@avigliano2019; @clarke2007; @tzadik2017]. 
 
-Our goal was to assess the use of whole fin-spine microchemistry as a means of discriminating starry sturgeon (*Acipenser stellatus*) stocks in the northern and southern Caspian Sea. Therefore, we quantified a suite of microelements in pectoral fin spines of this important caviar species, which requires stocking in the Caspian Sea due to overfishing and habitat degradation [@pourkazemi2006]. The successful use of fin spines to discriminate among starry sturgeon from different regions could provide a crucial, non-lethal avenue for gathering baseline information about these imperiled fish.
+Analyzing whole otoliths or fin spines provides microchemistry data integrated across the lifetime of a fish, which can be useful for stock
+identification [@campana1999]. 
+However, when using whole otoliths or fin spines to identify stocks, age/size composition of the groups being
+compared (e.g., fish from different regions) must be carefully considered to minimize microchemical differences due to 
+ontogeny rather than, e.g., provenance [@campana2000; @soeth2019]. 
+For example, the proportion of fin-spine or otolith microchemistry reflecting adult life history will necessarily increase with fish age,
+which could lead to erroneous interpretations of microchemical differences if age differs among sampled groups. 
+This is especially important for fin spines, because resorption begins with the innermost material [@tzadik2017], meaning whole fin-spine microchemistry of 
+older fish not only includes more adult life-history data than that of younger fish, but also may lack a complete record of early life history.
+<!-- 
+Sturgeon otoliths are challenging to work with due to their irregular shape and annuli, 
+and therefore fin spines have been preferred, including for microchemistry studies [@arai2002].
+The Caspian Sea is home to six species of sturgeon, which are overfished and threatened by anthropogenic activities [@pourkazemi2006; @fazli2021].
+Although Caspian Sea sturgeon are important commercial fish, many details of their life histories remain unclear.
+For example, starry sturgeon (*Acipenser stellatus*) have been traditionally treated as a single stock, although some fish migrate from feeding grounds in 
+the southern Caspian Sea to spawn in rivers in the north, while others spawn in southern rivers.
+There is no published evidence for homing, but genetic studies have indicated regional differentiation in Caspian Sea sturgeon species, including starry sturgeon
+[@pourkazemi1999; @norouzi2016]. -->
+
+Here, we assessed the use of whole pectoral fin-spine microchemistry for discriminating starry sturgeon (*Acipenser stellatus*) from the northern and 
+southern Caspian Sea. Previous studies have shown genetic differences in several sturgeon species, including starry sturgeon, between the northern and southern 
+Caspian Sea [@pourkazemi1999; @norouzi2016], so we hypothesized that fish sourced from these two regions would similarly show differences in fin-spine microchemistry. 
+The successful use of fin spines to discriminate among starry sturgeon from different regions could provide a 
+crucial, non-lethal avenue for gathering baseline information about this imperiled fish, which is an important caviar species that 
+requires stocking in the Caspian Sea due to overfishing and habitat degradation [@pourkazemi2006; @fazli2021].
 
 \newpage
 
@@ -172,121 +222,202 @@ Our goal was to assess the use of whole fin-spine microchemistry as a means of d
 
 ## Study area 
 
-The Caspian Sea has a variable salinity of about 1.2%, roughly one third that of seawater [@matishov2018]. It is divided into three distinct basins (north, middle and south) (**Fig. \@ref(fig:map)**). The northern basin is by far the shallowest, with a maximum depth of only ~20 m compared with 788 and 1,025 m, respectively, for the middle and south basins [@ibrayev2010]. The northern basin is also heavily influenced by the input of the Volga River, which accounts for about 80% of all river discharge into the Caspian Sea, resulting in a lower salinity [@ibrayev2010; @matishov2018]. 
+The Caspian Sea has a variable salinity of about 1.2%, roughly one third that of seawater [@matishov2018]. 
+It is divided into three distinct basins (north, middle and south) (**Fig. \@ref(fig:map)**). 
+The northern basin is by far the shallowest, with a maximum depth of only ~20 m compared with 788 and 1,025 m, respectively, 
+for the middle and south basins [@ibrayev2010]. 
+The northern basin is also heavily influenced by the input of the Volga River, 
+which accounts for about 80% of all river discharge into the Caspian Sea, resulting in a lower salinity [@ibrayev2010; @matishov2018]. 
 
 ## Study species 
 
-Starry sturgeon are a large-growing (> 1.7 m) and long-lived (at least 29 years) anadromous fish species [@bakhshalizadeh2012; @bakhshalizadeh2017]. They spawn in rivers and the juveniles migrate to shallow coastal waters, where they feed and grow for 3–4 years before moving off-shore to mature [@fadeyeva1981]. Females move off-shore earlier but mature later than males (maturity at 7 vs. 6 years, respectively) [@bakhshalizadeh2017]. Starry sturgeon populations have suffered greatly from environmental degradation and overfishing, and are now supported through stocking efforts [@pourkazemi2006; @bakhshalizadeh2021].
+Starry sturgeon are a large-growing (> 1.7 m) and long-lived (at least 29 years) anadromous 
+fish species [@bakhshalizadeh2012; @bakhshalizadeh2017]. 
+They spawn in rivers, and the juveniles migrate to shallow coastal waters, where they feed and grow for 3–4 years before 
+moving off-shore to mature [@fadeyeva1981]. 
+Females move off-shore earlier but mature later than males (maturity at 7 vs. 6 years, respectively) [@bakhshalizadeh2017]. 
+Starry sturgeon populations have suffered greatly from environmental degradation and overfishing, 
+and are now supported through stocking efforts [@pourkazemi2006; @bakhshalizadeh2021].
 
 ## Sample collection, preparation, and analyses 
 
-Starry sturgeon were collected in the northern and southern Caspian Sea (red shoreline in **Fig. \@ref(fig:map)**) from commercial catches harvested with either beach seines (1,000–1,100 m long, 10–15 m deep, and cod-end mesh of 30–33 mm) or gill nets (18 m long, 2.1 m deep, and knot-to-knot mesh size of 100 mm). All specimens were adults, and no fish were killed specifically for this project. Fish were sexed via macroscopic examination of gonads. The right pectoral fin spine was collected from each fish and cleaned with a brush followed by an ultrasonic bath to remove soft tissues.
+Adult male (n = `r select_fish("north|south", "male", fish_data)`) and female (n = `r select_fish("north|south", "female", fish_data)`) 
+starry sturgeon were collected in the northern and southern Caspian Sea (red shoreline in **Fig. \@ref(fig:map)**; **Table \@ref(tab:fish-table)**) from 
+commercial catches harvested with either beach seines (1,000–1,100 m long, 10–15 m deep, and cod-end mesh of 30–33 mm) or gill nets 
+(18 m long, 2.1 m deep, and knot-to-knot mesh size of 100 mm). No fish were killed specifically for this project. 
+Fish were sexed via macroscopic examination of gonads.
 
-Spine samples were prepared and analyzed using inductively coupled plasma mass spectrometry (ICP-MS; 7500 Series, Agilent, Santa Clara, CA, USA) by the staff at the Aria Sharif Chemical Laboratory (Karaj, Iran). Briefly, 6 g samples of cleaned spines were immersed in a 2:1 (v/v) mixture of 65% nitric acid (HNO~3~; Merck, Darmstadt, Germany) and 60% perchloric acid (HClO~4~; Merck) at 70°C to totally dissolve the spines. The obtained solution was then mixed with distilled water in a sampling vial to a volume of 50 mL. ICP-MS was used to measure fin spine `r most_raw_elems_formatted` and `r last_raw_elem`. A multi-element standard (1094870100SKU; Merck) was used for instrument calibration every five samples. The operational conditions for the ICP-MS were optimized following the manufacturer’s instructions, as follows: cone, nickel; RF power, 1,500 W; nebulizer gas flow rate, 0.6 L/min; plasma gas flow rate, 12 L/min; auxiliary gas flow rate, 1 L/min; and integration time, 6 s.
+To prepare samples for further analyses, the right marginal pectoral fin (i.e., the most cranial one) was extracted from each fish by cutting it at the articulation point, 
+following @koch2008. Removed fin spines were placed in a warm bath of distilled water for 10 min, then cleaned with a brush to remove soft tissues [@bakhshalizadeh2013].
+Finally, the samples were air-dried on filter paper and then sonicated for 5 min in ultra-pure water [@bakhshalizadeh2021a].
+Fish were aged by counting rings from fin-spine thin-sections under light microscopy [@bakhshalizadeh2012; @bakhshalizadeh2015]. 
+
+Spine samples were analyzed using inductively coupled plasma mass spectrometry 
+(ICP-MS; 7500 Series, Agilent, Santa Clara, CA, USA) by the staff at the Aria Sharif Chemical Laboratory (Karaj, Iran). 
+Briefly, 6 g samples of cleaned spines were immersed in a 2:1 (v/v) mixture of 65% nitric acid (HNO~3~; Merck, Darmstadt, Germany) and 
+60% perchloric acid (HClO~4~; Merck) at 70°C to totally dissolve the spines. 
+The obtained solution was then mixed with distilled water in a sampling vial to a volume of 50 mL. 
+ICP-MS was used to measure fin spine `r formatted_element_list`. 
+A multi-element standard (1094870100SKU; Merck) was used for instrument calibration every five samples. 
+The operational conditions for the ICP-MS were optimized following the manufacturer’s instructions, 
+as follows: cone, nickel; RF power, 1,500 W; nebulizer gas flow rate, 0.6 L/min; plasma gas flow rate, 12 L/min; auxiliary gas flow rate, 
+1 L/min; and integration time, 6 s.
+
+```{r, echo = FALSE}
+tar_load(length_u_test_res)
+tar_load(age_u_test_res)
+tar_load(sex_prop_test)
+tar_load(region_age_summary)
+tar_load(region_length_summary)
+
+south_length <- region_length_summary %>% .[region == "south", median]
+south_length_mad <- region_length_summary %>% .[region == "south", mad] %>% signif(3)
+north_length <- region_length_summary %>% .[region == "north", median]
+north_length_mad <- region_length_summary %>% .[region == "north", mad]%>% signif(3)
+
+south_age <- region_age_summary %>% .[region == "south", median]
+south_age_mad <- region_age_summary %>% .[region == "south", mad]%>% signif(3)
+north_age <- region_age_summary %>% .[region == "north", median]
+north_age_mad <- region_age_summary %>% .[region == "north", mad]%>% signif(3)
+
+south_length_formatted <- plus_minus(south_length, south_length_mad)
+north_length_formatted <- plus_minus(north_length, north_length_mad)
+south_age_formatted <- plus_minus(south_age, south_age_mad)
+north_age_formatted <- plus_minus(north_age, north_age_mad)
+
+south_males <- select_fish("south", "male", fish_data)
+south_females <- select_fish("south", "female", fish_data)
+north_males <- select_fish("north", "male", fish_data)
+north_females <- select_fish("north", "female", fish_data)
+
+south_ratio <- glue::glue("{south_males}/{south_females}")
+north_ratio <- glue::glue("{north_males}/{north_females}")
+
+```
 
 ## Data analyses
 
-Fish lengths did not differ significantly between the northern and southern samples, so we made no adjustments for the effect of length on whole fin-spine microchemistry. Elemental contents were normalized relative to Ca as an internal standard. Sr/Ba was also evaluated, given its high sensitivity to transitional estuarine environments [@mcculloch2005; @walther2011]. Then all data were examined for normality and homogeneity before performing statistical analyses, and transformed where necessary [@quinn2002].
+We found no significant differences in age (median ± M.A.D.: south, `r south_age_formatted` years vs. north, `r north_age_formatted` years;
+Mann–Whitney U test, `r in_text_pval(age_u_test_res$p)`), 
+total length (south, `r south_length_formatted` cm vs. north, `r north_length_formatted` cm; Mann–Whitney U test, `r in_text_pval(length_u_test_res$p)`), 
+and sex ratio (males/females: south, `r south_ratio` vs. north, `r north_ratio`; 
+two-sided proportion test, `r in_text_pval(sex_prop_test$p_value)`)
+between regions, indicating that our samples were sufficiently comparable to minimize differences in microchemistry due to ontogeny rather than
+environmental history [@campana2000]. Elemental contents were normalized relative to Ca. 
+<!-- Sr/Ba was also evaluated, given its high sensitivity to transitional estuarine environments [@mcculloch2005; @walther2011].  -->
+All data were examined for normality and homogeneity before performing statistical analyses [@quinn2002].
+Some elemental ratios failed the assumption of normality (both transformed and log-transformed) for two-way analysis of variance (ANOVA).
+Therefore, we used a non-parametric alternative, the Scheirer–Ray–Hare (SRH) extension of the Kruskal–Wallis test, to evaluate the effects of sex, region, 
+and the interaction thereof on element-to-calcium ratios [@sokal1995; @scheirer1976]. 
+Dunn's test for multiple comparisons was performed in the case of any significant interactions [@dunn1964].
 
-Two-way analysis of variance (ANOVA) was performed to evaluate the effects of sex, regions, and their interaction on element to calcium ratios [@zar1996]. Elemental ratios were log-transformed to normalize the data. Tukey’s post-hoc test for multiple comparisons was performed in the case of any significant ANOVA results. Principal component analysis (PCA) and permutational ANOVA (PERMANOVA) were used to investigate regional differences across all elemental ratios [@quinn2002; @oksanen2022]. PERMANOVA was performed with Euclidean distance and 10,000 permutations using the `adonis2` function in the R package `vegan` [@oksanen2022]. Linear discriminant analysis (LDA) was used to estimate the percentage of spines that could be correctly classified into their regions based on their whole fin-spine microchemistry [@friedman2018]. LDA was performed using the `tidymodels` and `discrim` packages in R [@tidymodels; @discrim]. All analyses not otherwise listed were performed in R [@R]. Visualizations were created using `ggplot2` in R [@ggplot2]. Map data in **Fig. \@ref(fig:map)** were sourced from Natural Earth [@natearth] and GEBCO [@gebco].
+Principal component analysis (PCA) and permutational ANOVA (PERMANOVA) were used to investigate 
+regional differences across all significant elemental ratios [@soeth2019; @schroeder2022; @oksanen2022]. 
+PERMANOVA was performed with Euclidean distance and 10,000 permutations using the `adonis2` function in the 
+R package `vegan` [@oksanen2022]. 
+Flexible discriminant analysis (FDA) was used to estimate the percentage of fish that could be correctly 
+classified into their regions based on their whole fin-spine microchemistry [@friedman2018]. FDA performance was evaluated using four-fold 
+cross-validation. That is, the data were divided into four unique subsets stratified by region. Then, three of the four subsets were used
+to build the model, while the remaining one was used to evaluate model performance. This process was repeated for all subsets. 
+To reduce the influence of random subsetting on model performance, the whole process was repeated 1,000 times. Model performance metrics
+(accuracy and receiver opeating curve [ROC] area under the curve [AUC]) were averaged across all models.
+FDA was performed using the `tidymodels` and `discrim` packages in R [@tidymodels; @discrim]. 
+All analyses not otherwise listed were performed in R [@R]. 
+Visualizations were created using `ggplot2` in R [@ggplot2]. 
+Map data in **Fig. \@ref(fig:map)** were sourced from Natural Earth [@natearth] and GEBCO [@gebco].
+
+
+
+```{r fish-table, echo=FALSE}
+tar_load(fish_table)
+kable(fish_table, format = "pandoc", caption = "Summary statistics for starry sturgeon (*Acipenser stellatus*) collected from the northern and southern Caspian Sea. Sampling areas correspond to the red highlighted coastlines in **Fig. 1**. Total length is the median value. M.A.D., median absolute deviation.")
+```
+
 
 \newpage
-
-```{r fish-data, message = FALSE, echo = FALSE, include = FALSE}
-
-fish_data <- readRDS(here::here("figures", "fish_table.RDS"))
-
-total_fish <- fish_data %>%
-  dplyr::pull(N) %>% 
-  sum()
-
-select_fish <- function(region, sex, df = fish_data){
-  df %>% 
-    dplyr::filter((Region == region) & (Sex == sex)) %>% 
-    dplyr::pull(N)
-}
-
-```
 
 # Results 
 
-Fin spines from a total of `r total_fish` fish were sampled (`r select_fish("south", "male")` males and `r select_fish("south", "female")` females from the south; `r select_fish("north", "male")` males and `r select_fish("north", "female")` females from the north) (**Table \@ref(tab:fish-table)**). `r most_elems_formatted` and `r last_elem` in pectoral fin spines of starry sturgeons differed significantly (p < 0.05) between geographic regions (**Fig. \@ref(fig:bar-chart)**, **Table \@ref(tab:anova-table)**); fish from the southern Caspian Sea had lower `r north_most_formatted` and `r north_last`, but higher `r south_formatted`, than fish from the northern Caspian Sea.  Ba/Ca was the only element that differed significantly by sex (Tukey's HSD, adjusted p = `r ba_sex_sig`), which was due to significant differences between northern and southern males (Tukey's HSD, adjusted p = `r male_male_diff`) and between southern males and females (Tukey's HSD, adjusted p = `r south_diff`) (**Table \@ref(tab:anova-table)**).
+```{r fish-data, message = FALSE, echo = FALSE, include = FALSE}
 
-```{r fish-table, echo=FALSE}
-kable(readRDS(here::here("figures", "fish_table.RDS")), format = "pandoc", caption = "Summary statistics for starry sturgeon (*Acipenser stellatus*) collected from the northern and southern Caspian Sea.")
+tar_load(fish_data)
+tar_load(total_fish)
+```
+
+Fin spines from a total of `r total_fish` fish were sampled (`r south_males` males and
+ `r south_females` females from the south; `r north_males` males 
+ and `r north_females` females from the north) (**Table \@ref(tab:fish-table)**). 
+ `r sig_elems_formatted` in pectoral fin spines of starry sturgeons differed significantly 
+ (Scheirer–Ray–Hare test, p < 0.05) between geographic regions (**Fig. \@ref(fig:bar-chart)**, **Table \@ref(tab:anova-table)**); 
+ fish from the southern Caspian Sea had significantly lower `r north_higher_formatted`, but higher `r south_higher_formatted`, 
+ than fish from the northern Caspian Sea. No elements differed significantly by sex. Ba/Ca was the only element whose interaction term was significant.
+ Dunn's test inidicated this was due to significant differences between northern and southern 
+ males (adjusted p = `r male_male_diff`) and between southern males and southern females 
+ (adjusted p = `r south_diff`).
+
+
+```{r label = bar-chart, echo = FALSE, warning = FALSE, fig.cap = "Median element-to-calcium ratios in pectoral spines of starry sturgeon from the northern and southern Caspian Sea. Error bars show median absolute deviation. P-values indicate significant differences based on the Scheirer–Ray–Hare extension of the Kruskal–Wallis test."}
+
+tar_load(srh_bar_chart)
+knitr::include_graphics(knitr::plot_crop(srh_bar_chart))
+# knitr::include_graphics(here(srh_bar_chart))
+
 ```
 
 
-
-```{r label = bar-chart, echo = FALSE, fig.cap = "Mean element-to-calcium ratios in pectoral spines of starry sturgeon from the northern and southern Caspian Sea. Error bars show standard deviation. P-values indicate significant differences in log-transformed data based on ANOVA with Tukey's test.", out.width = '75%'}
-
-knitr::include_graphics(knitr::plot_crop(here("figures", "bar_chart.jpg")))
-
-```
-
-
-
+\newpage
 ```{r anova-table, echo=FALSE, message=FALSE}
-anova_table <- readRDS(here::here("figures", "anova_table.RDS"))
+tar_load(formatted_srh_table)
 
-anova_table <- anova_table %>%
-  group_by(Variable) %>%
-  mutate(Comparison = replace(Comparison, duplicated(Comparison), "")) %>%
-  ungroup() %>%
-  mutate(Variable = replace(Variable, duplicated(Variable), ""))
-
-kable(anova_table, format = "pandoc", align = "c", longtable = T, caption = "Two-way analysis of variance (ANOVA) results with Tukey's post-hoc test for multiple comparisons. Element-to-calcium ratios in male and female starry sturgeon from the northern and southern Caspian Sea were compared. Elemental ratios were log-transformed prior to analysis.",
-      booktabs=T, digits = 3, font_size = 7) 
+kable(
+  formatted_srh_table, 
+  format = "pandoc", 
+  # align = "c", 
+  longtable = T, 
+  caption = "Results of the Scheirer–Ray–Hare extension of the Kruskal–Wallis test. Element-to-calcium ratios in male and female starry sturgeon from the northern and southern Caspian Sea were compared. '*' indicates significance at p < 0.05.",
+  booktabs = T, 
+  digits = 3, 
+  font_size = 7
+  ) 
 
 ```
 
+\newpage
 
 ```{r pca-prep, echo=FALSE, message=FALSE, include=FALSE}
-
-pca_prep <- readRDS(here::here('data', 'pca_prep.RDS'))
-
-sdev <- pca_prep$steps[[3]]$res$sdev
-
-percent_variation <- sdev^2 / sum(sdev^2)
-
-var_df <- data.frame(PC=paste0("PC",1:length(sdev)),
-                     var_explained=percent_variation,
-                     stringsAsFactors = FALSE)
-
-pcs <- c("PC1", "PC2", "PC3", "PC4")
-
-get_pc_variation <- function(pcs, df = var_df){
-  df %>%
-    dplyr::filter(PC %in% pcs) %>%
-    dplyr::pull(var_explained) %>%
-    signif(3)
-}
-
-pc_vars <- get_pc_variation(pcs) * 100
+tar_load(pc_vars)
 
 ```
-
-
-
-PCA was conducted using the elemental ratios that showed significant differences between fish from the northern and southern Caspian Sea in ANOVA (i.e., `r most_elems_formatted` and `r last_elem`). The first four principal components accounted for `r sum(pc_vars)`% of the total variation (PC1 = `r pc_vars[1]`%, PC2 = `r pc_vars[2]`%, PC3 = `r pc_vars[3]`%, and PC4 = `r pc_vars[4]`%) (**Fig. \@ref(fig:pca)**). PERMANOVA of the distance matrix of the principal components showed significant differences for region (p < 0.05, **Table \@ref(tab:adonis)**). Cross-validated classification by LDA yielded an accuracy of `r lda_accuracy`% when predicting region using significant elemental ratios (log-transformed, scaled, and centered).
-
-
-
 \newpage
+
+
+PCA was conducted using the elemental ratios that showed significant differences between fish from the northern and 
+southern Caspian Sea in ANOVA (i.e., `r sig_elems_formatted`). 
+The first four principal components accounted for `r sum(pc_vars)`% of the total variation 
+(PC1 = `r pc_vars[1]`%, PC2 = `r pc_vars[2]`%, PC3 = `r pc_vars[3]`%, and PC4 = `r pc_vars[4]`%) (**Fig. \@ref(fig:pca)**). 
+PERMANOVA of the distance matrix of the principal components showed significant differences for region 
+(p < 0.05, **Table \@ref(tab:adonis)**). Cross-validated classification by FDA yielded an accuracy 
+of `r fda_accuracy`% and an ROC AUC value of `r fda_roc_auc` when classifying
+fish into regions based on spine microchemistry.
+
+
+
 ```{r adonis, echo=FALSE}
-adonis_tab <- readRDS(here::here("figures", "adonis.RDS"))
-colnames(adonis_tab) <- c("df", "SS", "R^2^", "F", "p")
-rownames(adonis_tab) <- c("region", "sex", "region * sex", "residual", "total")
+# adonis_tab <- readRDS(here::here("figures", "adonis.RDS"))
+tar_load(adonis_table)
 
-kable(adonis_tab, digits = 2, format = "pandoc", align = "c", caption = "Permutational analysis of variance (PERMANOVA) results for the distance matrix of principal components of significant element-to-calcium ratios.")
+
+kable(adonis_table, digits = 2, format = "pandoc", align = "c", caption = "Permutational analysis of variance (PERMANOVA) results for the distance matrix of principal components of significant element-to-calcium ratios.")
 ```
 
 
 \newpage
 
-```{r label = pca, echo = FALSE, fig.cap = "Principal component analysis (PCA) score plot of trace element-to-calcium ratios (log-transformed) in pectoral spines of starry sturgeon from the northern (blue circles) and southern (red triangles) Caspian Sea. Ellipses are for visual aid only. Squares indicate data centroids.", out.width = '100%'}
+```{r label = pca, echo = FALSE, warning = FALSE, fig.cap = "A) Principal component analysis (PCA) score plot of trace element-to-calcium ratios in pectoral spines of starry sturgeon from the northern (blue circles) and southern (red triangles) Caspian Sea. Ellipses are for visual aid only. Squares indicate data centroids. B) Absolute values of contributions from elemental ratios to PCs. Dots indicate negative values, while slashes indicate positive values.", out.width = '100%'}
 
-knitr::include_graphics(knitr::plot_crop(here("figures", "PCA.jpg")))
+tar_load(full_pca_fig)
+
+knitr::include_graphics(knitr::plot_crop(full_pca_fig))
 
 ```
 
@@ -295,15 +426,149 @@ knitr::include_graphics(knitr::plot_crop(here("figures", "PCA.jpg")))
 
 # Discussion
 
-Our analyses of starry sturgeon pectoral fin spines revealed significant variation in `r most_elems_formatted` and `r last_elem` between fish from the northern and southern Caspian Sea. Furthermore, classification success to specific geographic regions using elemental variation was high (`r lda_accuracy`%). These results show that starry sturgeon in the northern and southern Caspian Sea differed in the environments to which they were exposed over the course of their lifetime, suggesting that fish in these regions may represent different stocks.
+Our analyses of starry sturgeon pectoral fin spines revealed significant variation in `r sig_elems_formatted` 
+between fish from the northern and southern Caspian Sea.
+Multivariate analyses using all elemental ratios indicated distinct regional groups.
+Furthermore, classification success to geographic regions using elemental variation was high (`r fda_accuracy`%). 
+These results show that starry sturgeon in the northern and southern Caspian Sea differed in the environments to which they 
+were exposed over the course of their lifetime, suggesting that fish in these regions may represent different stocks.
 
-Detailed life-history parameters are not known for the starry sturgeon examined in this study. However, microelements reflecting both environmental and biological factors differed in fin spines from fish collected in different regions, suggesting that fish from the northern and southern Caspian Sea may differ across a suite of life-history factors, such as habitat exploitation, growth, and/or feeding. The geography of the basin likely plays a large role in these chemical differences. The northern basin is extremely shallow and influenced by the freshwater discharge of the Volga River [@ibrayev2010; @matishov2018], resulting in a large, open, shallow basin with lower salinity (**Fig. \@ref(fig:map)**). By contrast, the south is characterized by a relatively narrow band of shallow coastal water surrounding a large, deep basin. These characteristics may explain, for example, why fish from the north had significantly lower Sr/Ca, as this ratio tends to to be higher in more saline environments [@campana1999; @elsdon2008]. Sturgeon in these two basins not only experience different chemical environments, but also likely require different feeding strategies. Interestingly, male starry sturgeon in the southern Caspian Sea had significantly lower Ba/Ca than females. This may reflect the earlier off-shore movements of females compared to males [@bakhshalizadeh2017]. Such differences may not have been observed in northern fish due to the similarities in near-shore and off-shore environments (i.e., relatively uniform, shallow depth across the northern basin; **Fig. \@ref(fig:map)**), although this hypothesis needs to be tested with water samples and additional fish.
+<!-- Detailed life-history parameters are not known for the starry sturgeon examined in this study. 
+However, microelements reflecting both environmental and biological factors differed in fin spines from fish 
+collected in different regions, suggesting that fish from the northern and southern Caspian Sea may differ across a 
+suite of life-history factors, such as habitat exploitation, growth, and/or feeding.  -->
+The geography of the basin likely plays a large role in the observed chemical differences. 
+The northern basin is extremely shallow and influenced by the freshwater discharge of the Volga River [@ibrayev2010; @matishov2018], 
+resulting in a large, open, estuarine basin with lower salinity (**Fig. \@ref(fig:map)**).
+By contrast, the south is characterized by a relatively narrow band of shallow coastal water surrounding a large, deep basin.
+Thus fish in the north are exposed to higher riverine inputs and much lower salinity [@tuzhilkin2005].
+This is consistent with the results of the present study, which showed lower `r south_higher_formatted` and higher `r north_higher_formatted` in
+fish from the north [**Fig. \@ref(fig:bar-chart)**].
+Although the pathways governing fin-spine microchemistry remain unknown [@loewen2016],
+recent studies have begun to reveal the complex mechanisms underlying those of otoliths [@hussy2020; @thomas2019a; @thomas2017; @thomas2019], 
+which are likely similar given the correlation between otolith and fin-spine microchemistry [@gillanders2001; @tzadik2017].
 
-Stocking may have also influenced the observed results. Caspian Sea sturgeon stocks have been devastated by fishing and environmental degradation, and all five species present are supported by artificial stocking efforts [@pourkazemi2006]. Fish stocked in Russia in the north, for example, may differ genetically, behaviorally, physiologically, etc., from those stocked in Iran in the south, in addition to being exposed to different environments. fin-spine microchemistry has been shown to vary significantly among age-0 sturgeon from different hatcheries in Iran [@bakhshalizadeh2021a], so it would not be unreasonable that even starker differences exist between fish stocked by different national authorities. This could be further complicated by differences in survivorship of stocked vs. naturally spawned fish and/or stocking rates in the north and south, especially given the environmental differences between regions. Although hatchery water may have influenced the elemental ratios observed in the present study to some degree, fin spine resorption occurs from the innermost material outwards [@tzadik2017]. Thus, the influence of hatchery water chemistry on the lifetime fin-spine microchemistry of adult fish should be non-existent to minimal.
+Sr in calcified structures has a relatively long history of use in elucidating fish
+life histories [@campana1999; @elsdon2008; @hussy2020]. Sr/Ca in calcified parts of fish is 
+strongly correlated with water chemistry [@hussy2020; @walther2006] and is useful for indicating transitions from freshwater 
+to estuarine or marine water and vice versa [@hermann2016; @mcculloch2005; @tabouret2010; @walther2011].
+The lower Sr/Ca we observed in fin spines of northern starry sturgeon is consistent with the lower salinity of this region, indicating
+fish from different regions likely had different lifetime salinity exposure.
+B/Ca was also lower in fish from the north.
+Boron correlates positively with salinity in seawater [@kulinski2017], and B/Ca
+in calcified organisms such as foramenifera correlates positively with pH [@yu2007]. Recent studies in otoliths have suggested similar relationships,
+although the literature is still sparse and the results somewhat mixed [@limburg2023; @cavole2023]. A similar association between salinity/pH may exist
+with B/Ca in fin spines, which would be consistent with our results.
 
-Although the pathways governing fin-spine microchemistry remain unknown [@loewen2016], recent studies have begun to reveal the complex mechanisms underlying those of otoliths [@hussy2020; @thomas2019a; @thomas2017; @thomas2019], which are likely similar. Sr and Ba in calcified structures have a relatively long history of use in elucidating fish life histories [@campana1999; @elsdon2008]. The ratios of these elements to calcium in calcified parts of fish are strongly correlated with water chemistry [@hussy2020; @walther2006] and are useful for indicating transitions from freshwater to marine water and vice versa [@hermann2016; @mcculloch2005; @tabouret2010; @walther2011]. Zn and Cu in calcified structures appear to be de-coupled from concentrations in ambient water [@hussy2020; @thomas2017]. In otoliths, they may play a physiological role as co-factors for enzymes associated with the otolith protein matrix [@thomas2017] and may therefore be indicative of fish physiology. Mn likely reflects both environmental concentrations and fish physiology [@hussy2020; @limburg2018]. The pathways by which B and Si enter calcified structures of fish remain poorly studied. Therefore, the microchemical differences observed here likely represent a complex mix of differences in lifetime environmental history, genetics, physiology, and behavior.
+In otoliths, both Zn and Cu likely reflect feeding and/or growth processes due to their physiological roles, rather than directly reflecting ambient water chemistry
+[@hussy2020; @thomas2017; @ranaldi2008]. Elevated otolith Zn/Ca and Cu/Ca has been associated with anthropogenic effects [@arslan2005], suggesting these elements
+may reflect pollutants from the environment obtained via prey items. @heidary2012 reported bioaccumulation of Zn and Cu in the tissues of starry sturgeon,
+while @bakhshalizadeh2023 found significantly higher heavy metals in fin spines of starry sturgeon from the north vs. those from the south.
+Exposure to pollutants may be higher in the north Caspian Sea due to the strong influence of the
+Volga and Ural rivers, thus explaining the elevated Zn/Ca and Cu/Ca observed in fin spines of northern starry sturgeon.
+Mn concentration has been associated with anthropogenic influences on river inputs as well as
+estuarine processes in rivers during low flow [@schroeder2022; @nelson2020]. 
+Mn/Ca in otoliths has also been used as a proxy for hypoxic conditions [@limburg2011; @limburg2015], which can occur when stratification occurs in estuaries
+[@schroeder1999; @nelson2020].
+During the summer months, large areas of bottom water in the north Caspian Sea can have hypoxic conditions depending on annual flow conditions [@tuzhilkin2005].
+Therefore, the significant differences in fin-spine Mn/Ca observed here may have been due to the the heavy influence that river 
+flow has on the physico-chemical conditions in the north basin [@tuzhilkin2005].
+There is little literature investigating pathways by which Si enters calcified structures of fish. However, Si/Ca is used as a proxy for terrestial sediment runoff in
+biochemical and paleoenvironmental studies [e.g., @bunzel2017]. This is consistent with our observations that Si/Ca was higher in fin spines of
+north Capsian Sea fish, but futher study is required.
 
-We found that fin-spine microchemistry was effective at discriminating starry sturgeon from different regions in the Caspian Sea. Elemental data suggest that starry sturgeons may have different life histories in the northern and southern Caspian Sea and therefore could represent different stocks. These results provide baseline information required for the conservation and management of these imperiled and poorly understood fish. Our study also adds to a growing body of literature demonstrating that fin-spine microchemistry is a valuable, non-lethal tool for assessing the life histories of threatened fish species [@allen2009; @arai2002; @avigliano2019; @bakhshalizadeh2021a; @cadrin2005; @clarke2007; @kerr2014; @phelps2012; @tzadik2017]. Microchemistry allows scientists and managers to rapidly gather life-history data from relatively small sample sizes. However, as in other threatened and poorly understood systems, additional efforts are needed to realize the potential of this method as a conservation tool [@hermann2021]. The regional diversity in sturgeon fin-spine microchemistry demonstrated here requires further study and could be cause for management action. This includes studies of the environment–fin spine pathways mediating the uptake of elements; international research and management cooperation (especially given the transboundary migrations that sturgeons can undertake); and fin-spine studies that include all Caspian Sea sturgeon species. A broad, long-term, and international investigation of sturgeon fin-spine microchemistry in the Caspian Sea could provide a research and management framework for other poorly studied regions with threatened species.
+Finally, Ba/Ca was the only elemental ratio that showed significant differences for the interaction between region and sex. Males in the south had significantly
+different values than males in the north and females in the south.
+Ba/Ca in calcified parts of fish is strongly correlated with water chemistry [@hussy2020; @walther2006] and useful for indicating transitions from freshwater 
+to marine water and vice versa [@hermann2016; @mcculloch2005; @tabouret2010; @walther2011].
+Therefore, our results may reflect the earlier off-shore movements of females compared to males in the south [@bakhshalizadeh2017]. 
+Such differences may not have been observed in northern fish due to the similarities in near-shore and off-shore 
+environments (i.e., relatively uniform, shallow depth across the northern basin; **Fig. \@ref(fig:map)**).
+These results should be approached with caution, however.
+The south Caspian Sea has considerable environmental variability [@fallah2022] and Ba can derive from numerous sources [@correia2021]. 
+Furthermore, differences in Ba/Ca have been observed between starry sturgeon from the eastern and western
+parts of the south Caspian Sea [@bakhshalizadeh2021a].
+Given our small sample size and uneven sampling between the southeastern and southwestern Caspian Sea (**Table \@ref(tab:fish-table)**),
+it is uncertain whether this result was due to within-region variation in environmental Ba or fish behavior, 
+or would disappear entirely with a larger sample size.
+
+
+<!-- Boron correlates positively with salinity in seawater [@kulinski2017], and B/Ca
+in calcified organisms such as foramenifera correlates positively with pH [@yu2007]. Recent studies in otoliths have suggested similar relationships,
+although the literature is still sparse and the results somewhat mixed [@limburg2023; @cavole2023]. Given the correlation between otolith and 
+fin-spine microchemistry [@gillanders2001; @tzadik2017], it would not be unreasonable to hypothesize that such a relationship exists for fin-spine microchemistry as well. This would be
+consistent with the lower B/Ca observed in sturgeon from the northern Caspian Sea, as fish in the north likely are likely exposed to lower salinity over their lifetime.
+ This may explain higher levels of these rations in fin spines of northern fish, 
+which are exposed to more freshwater discharge than fish from the south.  -->
+
+<!-- Feeding strategies may also differ somewhat between fish from the north and south.
+Juvenile sturgeon spend the first 
+Interestingly, male starry sturgeon in the southern Caspian Sea had significantly lower Ba/Ca than females. 
+This may reflect the earlier off-shore movements of females compared to males [@bakhshalizadeh2017]. 
+Such differences may not have been observed in northern fish due to the similarities in near-shore and off-shore 
+environments (i.e., relatively uniform, shallow depth across the northern basin; **Fig. \@ref(fig:map)**), 
+although this hypothesis needs to be tested with water samples and additional fish. -->
+
+Stocking may have also influenced the observed results. 
+Caspian Sea sturgeon stocks have been devastated by fishing and environmental degradation, and all six species present are 
+supported by artificial stocking efforts [@pourkazemi2006]. 
+Fish stocked in Russia in the north, for example, may differ genetically, behaviorally, physiologically, etc., 
+from those stocked in Iran in the south, in addition to being exposed to different environments. 
+For example, differences in maturation and growth rates have been observed between northern and southern starry sturgeon [@khodorevskaya2014].
+This could have influenced the observed significant regional differences in Mn/Ca, Zn/Ca, and Cu/Ca, as all of these
+ratios in otoliths have been associated with growth processes [@hussy2020; @thomas2017].
+Fin-spine microchemistry has been shown to vary significantly among age-0 sturgeon from different hatcheries in 
+Iran [@bakhshalizadeh2021a], so it would not be unreasonable that even starker differences exist between fish stocked by 
+different national authorities. 
+This could be further complicated by differences in survivorship of stocked vs. naturally spawned fish and/or 
+stocking rates in the north and south, especially given the environmental differences between regions. 
+Although hatchery water may have influenced the elemental ratios observed in the present study to some degree, 
+fin spine resorption occurs from the innermost material outwards [@tzadik2017]. 
+Thus, the influence of hatchery water chemistry on the lifetime fin-spine microchemistry of adult fish should be non-existent to minimal.
+
+<!-- Although the pathways governing fin-spine microchemistry remain unknown [@loewen2016], 
+recent studies have begun to reveal the complex mechanisms underlying those of otoliths [@hussy2020; @thomas2019a; @thomas2017; @thomas2019], 
+which are likely similar. 
+Sr and Ba in calcified structures have a relatively long history of use in elucidating fish 
+life histories [@campana1999; @elsdon2008; @hussy2020]. The ratios of these elements to calcium in calcified parts of fish are 
+strongly correlated with water chemistry [@hussy2020; @walther2006] and are useful for indicating transitions from freshwater 
+to marine water and vice versa [@hermann2016; @mcculloch2005; @tabouret2010; @walther2011]. 
+Zn and Cu in calcified structures appear to be de-coupled from concentrations in ambient water [@hussy2020; @thomas2017]. 
+In otoliths, they may play a physiological role as co-factors for enzymes associated with the otolith protein matrix [@thomas2017] 
+and may therefore be indicative of fish physiology. Mn likely reflects both environmental concentrations and fish 
+physiology [@hussy2020; @limburg2018]. 
+The pathways by which B and Si enter calcified structures of fish remain poorly studied. 
+Therefore, the microchemical differences observed here likely represent a complex mix of differences in lifetime 
+environmental history, genetics, physiology, and behavior. -->
+
+Our study had some limitations that future studies can address.
+First, our sample size was small. 
+Acquiring samples of these rare fish is challenging, but a larger sample size
+would have allowed us to be more selective of the fish included (e.g., to reduce the variability in fish age) and
+improve the detection of meaningful significant results vs. those that happened by chance (as may have been the case with Ba/Ca).
+Second, we used whole fin spines rather than analyzing transects of cross-sections (e.g., via laser ablation ICP-MS).
+A transect approach would have provided finer-scale environmental data that could be correlated to growth rings and thus specific life-history changes
+[@campana1999; @elsdon2008]. Transect data also would have allowed us to compare fish of disparate ages, as the relationship between microchemical data
+and age is not obscured by integrating over the lifetime of the fish.
+
+We found that whole fin-spine microchemistry was effective at discriminating starry sturgeon 
+from different regions in the Caspian Sea. 
+Elemental data suggest that starry sturgeons may have different life 
+histories in the northern and southern Caspian Sea and therefore could represent different stocks. 
+These results provide baseline information required for the conservation and management of these imperiled and poorly understood fish. 
+Our study also adds to a growing body of literature demonstrating that fin-spine microchemistry is a valuable, 
+non-lethal tool for assessing the life histories of threatened fish 
+species [@allen2009; @arai2002; @avigliano2019; @bakhshalizadeh2021a; @cadrin2005; @clarke2007; @kerr2014; @phelps2012; @tzadik2017]. 
+Microchemistry allows scientists and managers to rapidly gather life-history data from relatively small sample sizes. 
+However, as in other threatened and poorly understood systems, additional efforts are needed to realize the potential of this method 
+as a conservation tool [@hermann2021]. 
+The regional diversity in sturgeon fin-spine microchemistry demonstrated here requires further study and could be cause 
+for management action. 
+This includes studies of the environment–fin spine pathways mediating the uptake of elements; 
+international research and management cooperation (especially given the transboundary migrations that sturgeons can undertake); 
+and fin-spine microchemical studies that include all Caspian Sea sturgeon species. 
+A broad, long-term, and international investigation of sturgeon fin-spine microchemistry in the Caspian Sea could provide a 
+research and management framework for other poorly studied regions with threatened species.
 
 \newpage
 

@@ -21,13 +21,14 @@ make_anova_data <- function(data_parsed){
 # log transform to improve normality
 log_trans_anova_data <- function(anova_data){
   anova_data %>%
-    dplyr::mutate(across(ba_ca:fe_ca, ~ log(.x + 1e-10)))
+    dplyr::mutate(across(ba_ca:fe_ca, ~ log(.x + (1 - min(.x)))))
 }
   
 
 # 3. functions ------------------------------------------------------------
 
 get_anova_tukey_table <- function(element, df) {
+  # browser()
   element <- rlang::as_name(enquo(element))
   formula <- formula(paste(element, "~", "region*sex"))
   aov(formula, data = df) %>%
@@ -175,10 +176,6 @@ make_anova_bar_chart <- function(tukey, tukey_full, anova_data_clean_names){
       panel.grid.minor = ggplot2::element_blank(),
       # text = element_text(family = "Arial"),
       axis.text = element_text(color = "black")
-    )
+    ) +
+    theme_classic(base_size = 25)
 }
-# ggplot2::ggsave(here::here("figures", "bar_chart.tiff"), dpi = 1200, width = 129, height = 193.5, units = "mm")
-# ggplot2::ggsave(here::here("figures", "bar_chart.jpg"), dpi = 600, width = 129, height = 193.5, units = "mm")
-
-# # saving this for calculations in the manuscript.Rmd file
-# saveRDS(stat.test.full.log, here::here("data", "anova_output_data.RDS"))

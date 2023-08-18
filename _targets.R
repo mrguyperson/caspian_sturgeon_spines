@@ -1,7 +1,7 @@
 # Load packages required to define the pipeline:
 library(targets)
 library(here)
-# library(ggpubr)
+library(magrittr)
 library(tarchetypes) # Load other packages as needed. # nolint
 
 # Set target options:
@@ -28,7 +28,13 @@ tar_option_set(
     "ggsignif",
     "rstatix",
     "Hmisc",
-    "sf"
+    "sf",
+    "rcompanion",
+    "kableExtra",
+    "data.table",
+    "ggpattern",
+    "magick",
+    "glue"
     ),
   format = "rds" # default storage format
   # Set other options as needed.
@@ -41,14 +47,16 @@ tar_option_set(
 # Install packages {{future}}, {{future.callr}}, and {{future.batchtools}} to allow use_targets() to configure tar_make_future() options.
 
 # Run the R scripts in the R/ folder with your custom functions:
-# tar_source()
-source(here("R", "data_cleaning.R"))
-source(here("R", "data_analysis.R"))
-source(here("R", "anova.R"))
-source(here("R", "fish_summary.R"))
-source(here("R", "pca.R"))
-source(here("R", "helpers.R"))
-source(here("R", "map.R"))
+tar_source()
+# source(here("R", "data_cleaning.R"))
+# source(here("R", "data_analysis.R"))
+# source(here("R", "anova.R"))
+# source(here("R", "fish_summary.R"))
+# source(here("R", "pca.R"))
+# source(here("R", "helpers.R"))
+# source(here("R", "map.R"))
+# source(here("R", "dfa.R"))
+# source(here("R", "nonparametric_anova.R"))
 # source("other_functions.R") # Source other scripts as needed. # nolint
 
 zip_file_names <- c(
@@ -67,26 +75,45 @@ list(
     command = here("data", "spine_chem.csv"),
     format = "file"
   ),
+    tar_target(
+    name = supplement_path,
+    command = here("data", "fish_supplement.csv"),
+    format = "file"
+  ),
+  tar_target(
+    name = supplement,
+    command = get_fish_supplement_data(supplement_path)
+  ),
+  tar_target(
+    name = raw_data,
+    command = read_csv(raw_data_path)
+  ),
+  tar_target(
+    name = cleaned_raw_data,
+    command = clean_raw_data(raw_data)
+  ),
   tar_target(
     name = data_parsed,
-    command = clean_raw_data(raw_data_path)
+    command = dplyr::left_join(cleaned_raw_data,
+                                supplement,
+                                by = c("code", "sex", "region", "length_cm", "weight_kg")) 
   ),
-  # tar_target(
-  #   name = data_parsed,
-  #   command = parse_data(cleaned_data)
-  # ),
-  # tar_target(
-  #   name = pca_data,
-  #   command = select_pca_data(data_parsed)
-  # ),
   ##### ANOVA
   tar_target(
     name = anova_data,
     command = make_anova_data(data_parsed)
   ),
   tar_target(
+    name = shapiro_res,
+    command = shapiro_test_elements(anova_data)
+  ),
+  tar_target(
     name = trans_anova,
     command = log_trans_anova_data(anova_data)
+  ),
+  tar_target(
+    name = shapiro_res_trans,
+    command = shapiro_test_elements(trans_anova)
   ),
   tar_target(
     name = elements,
@@ -128,6 +155,25 @@ list(
     ),
     packages = c("ggpubr")
   ),
+  ##### Scheirer–Ray–Hare test
+  tar_target(
+    name = srh,
+    command = get_SRH_output(elements, anova_data)
+  ),
+  tar_target(
+    name = post_hoc_elements,
+    command = get_signif_nonparam_elements(srh)
+  ),
+  tar_target(
+    name = dunn_test_res,
+    command = do_all_dunn_tests(post_hoc_elements, anova_data)
+  ),
+  tar_target(
+    name = srh_bar_chart,
+    command = make_srh_bar_chart(anova_data_clean_names, srh_fancy_names),
+    format = "file"
+  ),
+
   ##### Fish summary
   tar_target(
     name = fish_data,
@@ -135,12 +181,28 @@ list(
   ),
   tar_target(
     name = fish_table,
-    command = male_fish_table(fish_data)
+    command = make_fish_table(fish_data)
+  ),
+  tar_target(
+    name = length_u_test_res,
+    command = mw_u_test(fish_data, length_cm)
+  ),
+  tar_target(
+    name = age_u_test_res,
+    command = mw_u_test(fish_data, age)
+  ),
+  tar_target(
+    name = sex_prop_test,
+    command = infer::prop_test(
+      data_parsed,
+      sex ~ region,
+      order = c("north", "south")
+    )
   ),
   ##### PCA
   tar_target(
     name = pca_data,
-    command = get_pca_data(data_parsed, elements)
+    command = get_pca_data(anova_data_clean_names, sig_elements)
   ),
   tar_target(
     name = pca_recipe,
@@ -152,7 +214,7 @@ list(
   ),
   tar_target(
     name = pca_juiced,
-    command = juice(pca_prep)
+    command = recipes::juice(pca_prep)
   ),
   tar_target(
     name = centroids,
@@ -160,12 +222,25 @@ list(
   ),
   tar_target(
     name = pca_figure,
-    command = make_pca_figure(pca_juiced, centroids)
+    command = make_pca_figure(pca_juiced, centroids, pc_vars)
+  ),
+  tar_target(
+    name = pc_vars,
+    command = get_pc_variation(pca_prep)
+  ),
+  tar_target(
+    name = components_contr_fig,
+    command = make_components_contr_fig(pca_prep, sig_elements)
+  ),
+  tar_target(
+    name = full_pca_fig,
+    command = make_full_pca_fig(pca_figure, components_contr_fig),
+    format = "file"
   ),
   ##### PERMANOVA
   tar_target(
     name = princ_components,
-    command = dplyr::select(pca_juiced, PC1:PC5)
+    command = dplyr::select(pca_juiced, PC1:PC4)
   ),
   tar_target(
     name = pca_distance,
@@ -173,7 +248,32 @@ list(
   ),
   tar_target(
     name = adonis_table,
-    command = adonis2(pca_distance ~ region * sex, data = pca_juiced, method = "eu", permutations = 1e5)
+    command = get_adonis_table(pca_distance, pca_juiced)
+  ),
+  ##### FDA
+  tar_target(
+    name = folds,
+    command = set_folds(anova_data)
+  ),
+  tar_target(
+    name = fda_recipe,
+    command = set_fda_recipe(anova_data)
+  ),
+  tar_target(
+    name = fda_model,
+    command = discrim_flexible(mode = "classification")
+  ),
+  tar_target(
+    name = fda_workflow,
+    command = set_fda_wf(fda_model, fda_recipe)
+  ),
+  tar_target(
+    name = fda_res,
+    command = get_fda_res(fda_workflow, folds)
+  ),
+  tar_target(
+    name = fda_metrics,
+    command = collect_metrics(fda_res)
   ),
   ##### Map
   tar_download(
@@ -297,7 +397,101 @@ list(
                       rivers,
                       rivers_europe,
                       lakes, 
-                      lakes_europe)
+                      lakes_europe),
+    format = "file"
   ),
-  format = "file"
+  ##### Manuscript stuff
+  tar_target(
+    name = srh_fancy_names,
+    command = fix_element_names(srh)
+  ),
+  tar_target(
+    name = sig_elements,
+    command = get_sig_elements(srh_fancy_names)
+  ),
+  tar_target(
+    name = diff_in_sig_elem,
+    command = region_diff_in_sig_elem(anova_data_clean_names, sig_elements)
+  ),
+  tar_target(
+    name = raw_elem_names,
+    command = get_raw_elem_names(raw_data)
+  ),
+  tar_target(
+    name = formatted_element_list,
+    command = sentence_format_for_list(raw_elem_names)
+  ),
+  tar_target(
+    name = fda_accuracy,
+    command = signif(get_fda_metric(fda_metrics, "accuracy") * 100, 3)
+  ),
+  tar_target(
+    name = fda_roc_auc,
+    command = signif(get_fda_metric(fda_metrics, "roc_auc"), 3)
+  ),
+  tar_target(
+    name = sig_elems_formatted,
+    command = sentence_format_for_list(sig_elements)
+  ),
+  tar_target(
+    name = south_higher_mean_elem,
+    command = get_mean_elem_comparison(diff_in_sig_elem, -delta_from_south)
+  ),
+  tar_target(
+    name = north_higher_mean_elem,
+    command = get_mean_elem_comparison(diff_in_sig_elem, delta_from_south)
+  ),
+  tar_target(
+    name = south_higher_formatted,
+    command = sentence_format_for_list(south_higher_mean_elem)
+  ),
+  tar_target(
+    name = north_higher_formatted,
+    command = sentence_format_for_list(north_higher_mean_elem)
+  ),
+  tar_target(
+    name = total_fish,
+    command = nrow(fish_data)
+  ),
+  tar_target(
+    name = formatted_srh_table,
+    command = format_srh_table(srh_fancy_names)
+  ),
+  tar_target(
+    name = region_age_summary,
+    command = get_regional_summary(fish_data, "age")
+  ),
+  tar_target(
+    name = region_length_summary,
+    command = get_regional_summary(fish_data, "length_cm")
+  ),
+  tar_render(
+    name = manuscript,
+    path = here("submission", "manuscript.Rmd")
+  ),
+  tar_render(
+    name = response_to_reviewers,
+    path = here("submission", "response_to_reviewers.Rmd")
+  ),
+  tar_target(
+    name = journal_name,
+    command = "Estuarine, Coastal and Shelf Science"
+  ),
+  tar_render(
+    name = highlights,
+    path = here("submission", "highlights.Rmd")
+  ),
+  tar_render(
+    name = cover_letter,
+    path = here("submission", "cover_letter.Rmd")
+  ), 
+    tar_render(
+    name = followup_letter,
+    path = here("submission", "followup_letter.Rmd")
+  ),
+  tar_render(
+    name = author_statement,
+    path = here("submission", "author_statement.Rmd")
+  )
+  
 )

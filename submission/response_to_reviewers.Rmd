@@ -1,0 +1,434 @@
+---
+output:
+  bookdown::pdf_document2:
+    keep_tex: true
+    toc: false
+  bookdown::word_document2:
+    toc: false
+geometry: margin=1.0in
+font-size: 12pt
+header-includes:
+  - \usepackage{helvet}
+  - \renewcommand*\familydefault{\sfdefault}
+  - \usepackage{setspace}
+  - \doublespacing
+bibliography: references.bib
+csl: https://www.zotero.org/styles/estuarine-coastal-and-shelf-science
+---
+```{r, include=FALSE, message=FALSE}
+library(targets)
+options(knitr.kable.NA = '')
+options(tinytex.verbose = TRUE)
+tar_load(journal_name)
+tar_load(length_u_test_res)
+tar_load(age_u_test_res)
+tar_load(sex_prop_test)
+```
+
+We thank the editor and reviewers for their thorough assessment of our manuscript. We understand that this process requires time and energy from all
+parties, so we appreciate the care shown to improve this work. Below, we have addressed all comments from the editor and reviewers in a point-by-point
+manner. The pre-selected questions from *`r journal_name`* were answered first, followed by the additional comments and questions from the reviewers.
+We formatted this document to facilitate the review process. Section headings and sub-headings, as well as questions from *`r journal_name`*, are
+marked in **bold** text; reviewer questions and comments are marked in *italics*; and our responses are highlighted in \textcolor{blue}{blue}.
+We found all the comments helpful and did our best to address them as fully as possible. Thank you very much for your time.
+
+# Comments from the editor
+
+**Please correct punctuation of refences in text and in Refence section according to journals specification.**
+
+\textcolor{blue}{We apologize for the incorrect formatting of in-text citations and the Reference section. We used a citation manager, and the formatting file seems to have 
+been out of date. We hope that updating this has fixed all issues.}
+
+# Comments from reviewers
+
+##  Questions from `r journal_name`
+
+1. **Are the objectives and the rationale of the study clearly stated?**
+
+**Reviewer #1**: *The objective was attained, the comparirons between north and south areas.
+However, some of the explanations provided by the authors to support the observed resuls can not be done. 
+I have described all of these points in the letter to authors.*
+
+\textcolor{blue}{Thank you for your helpful review of this manuscript. We appreciate your constructive criticsim and improvements to the text.
+We have split our answers your comments and questions between this section and section 2.2.1.}
+
+**Reviewer #2**: *The manuscript aims to know the microchemistry of the bones of Caspian Sea sturgeons and discriminate stocks. 
+The work is about a species of sturgeon endangered by its relevance. However, they have methodological weaknesses.*
+
+***Introduction***
+
+*The authors should include the hypothesis of the manuscript and on which they base their assumption of the existence of two groups one
+ in the north and one in the south of the Caspian Sea. Are there works using other methodologies for determining stocks of the species studied?*
+
+\textcolor{blue}{Thank you for this comment. We agree that this part of the introduction was somewhat vague in the original manuscript. Providing 
+a clearly written hypothesis and rationale is crucial for the reader. Therefore, based on your suggestion, we rewrote the last paragraph of the 
+Introduction:} 
+
+\textcolor{blue}{"Here, we assessed the use of whole pectoral fin-spine microchemistry for discriminating starry sturgeon (*Acipenser stellatus*) from the northern and 
+southern Caspian Sea. Previous studies have shown genetic differences in several sturgeon species, including starry sturgeon, between the northern and southern 
+Caspian Sea (Norouzi and Pourkazemi, 2016; Pourkazemi et al., 1999), so we hypothesized that fish sourced from these two regions would similarly show differences in fin-spine microchemistry. 
+The successful use of fin spines to discriminate among starry sturgeon from different regions could provide a 
+crucial, non-lethal avenue for gathering baseline information about this imperiled fish, which is an important caviar species that 
+requires stocking in the Caspian Sea due to overfishing and habitat degradation (Fazli et al., 2021; Pourkazemi, 2006)."}
+
+*Authors should include a paragraph on the scope of the use of spine microchemistry. 
+For example, the resorption of spines what limitations does it have?
+In relation to the study of calcified structures and their limitations can review the work 
+(Avigliano et al, 2020, Frontiers in Marine Science, 7, 687)*
+
+\textcolor{blue}{We expanded introductory text that covers the use of whole fin spines for microchemical analyses:}
+
+\textcolor{blue}{"Analyzing whole otoliths or fin spines provides microchemistry data integrated across the lifetime of a fish, which can be useful for stock
+identification (Campana, 1999). However, when using whole otoliths or fin spines to identify stocks, age/size composition of the groups being
+compared (e.g., fish from different regions) must be carefully considered to minimize microchemical differences due to
+ontogeny rather than, e.g., provenance (Campana et al., 2000; Soeth et al., 2019). 
+For example, the proportion of fin-spine or otolith microchemistry reflecting adult life history will necessarily increase with fish age,
+which could lead to erroneous interpretations of microchemical differences if age differs among sampled groups. 
+This is especially important for fin spines, because resorption begins with the innermost material (Tzadik et al., 2017), meaning whole fin-spine microchemistry of 
+older fish not only includes more adult life-history data than that of younger fish, but also may lack a complete record of early life history."}
+
+2. **If applicable, is the application/theory/method/study reported in sufficient detail to allow for its replicability and/or reproducibility?**
+
+\textcolor{blue}{No comments to address.}
+
+3. **If applicable, are statistical analyses, controls, sampling mechanism, and statistical reporting (e.g., P-values, CIs, effect sizes) appropriate and well described?**
+
+**Reviewer #1**: 
+*I think authors need to re-evaluate some statistical analysis. 
+A permutational ANOVA is a non-parametric method, and was followed by a Linear Discriminant Analysis (LDA), which is extrictly metric. 
+A non-normal discriminant analysys, such as mixed discriminant analysis (MDA) or flexible discriminant analysis (FDA) are 
+more appropriated and can improve the re-classification matrix results. 
+In addition, discriminant analysis must used all element ratios, not only the significant ones.*
+
+\textcolor{blue}{Thank you for pointing this out. We updated the analyses following your recommendations. We used a flexible discriminant analysis with all elemental
+ratios and updated the Methods and Results sections accordingly. 
+We provided additional details in the methods regarding how the FDA model was evaluated:}
+
+\textcolor{blue}{"Flexible discriminant analysis (FDA) was used to estimate the percentage of fish that could be correctly 
+classified into their regions based on their whole fin-spine microchemistry (Friedman, 2018). FDA performance was evaluated using four-fold 
+cross-validation. That is, the data were divided into four unique subsets stratified by region. Then, three of the four subsets were used
+to build the model, while the remaining one was used to evaluate model performance. This process was repeated for all subsets. 
+To reduce the influence of random subsetting on model performance, the whole process was repeated 1,000 times. Model performance metrics
+(accuracy and receiver opeating curve [ROC] area under the curve [AUC]) were averaged across all models."}
+
+**Reviewer #2**:
+
+***Materials and Methods***
+
+*2.3 Authors should include the N studied (line 49).*
+
+\textcolor{blue}{This line now includes the total number of samples and a reference to Table 1, which has further details on the fish collected for this study.}
+
+*The authors should explain in detail the preparation of the spines for determinations with ICPMs (lines 55-61).
+How was the age of the specimens determined?*
+
+\textcolor{blue}{The marginal pectoral fin (i.e., the most cranial one) was extracted from each fish by cutting it at the articulation point, 
+following Koch et al. (2008), and cleaned with warm distilled water. Fish were aged using ring data from fin-spine thin-sections under light microscopy. 
+These points have been updated in the text:}
+
+\textcolor{blue}{"To prepare samples for further analyses, the right marginal pectoral fin (i.e., the most cranial one) was extracted from each fish by cutting it at the articulation point, 
+following Koch et al. (2008). Removed fin spines were placed in a warm bath of distilled water for 10 min, then cleaned with a brush to remove soft tissues (Bakhshalizadeh et al., 2013a).
+Finally, the samples were air-dried on filter paper and then sonicated for 5 min in ultra-pure water (Bakhshalizadeh et al., 2021a).
+Fish were aged by counting rings from fin-spine thin-sections under light microscopy (Bakhshalizadeh et al., 2015, 2012)."}
+
+*2.4. The authors must support this sentence (Lines 20-22).
+What studies did the authors conduct to say that there are significant differences in TL of fish? 
+What statistical tests did they use and how?*
+
+\textcolor{blue}{Because of the small sample size, we conducted a Mann-Whitney U test, which indicated no significant differences
+in length between fish collected from the two regions (Mann–Whitney U test, `r in_text_pval(length_u_test_res$p)`). This has been updated in the text:}
+
+\textcolor{blue}{"We found no significant differences in age (median ± M.A.D.: south, 14 ± 0.741 years vs. north, 15 ± 1.48 years; 
+Mann–Whitney U test, p > 0.05), total length (south, 136 ± 19.3 cm vs. north, 131.5 ± 8.15 cm; Mann–Whitney U test, p > 0.05), 
+and sex ratio (males/females: south, 10/10 vs. north, 13/7; two-sided proportion test, p > 0.05) between regions, 
+indicating that our samples were sufficiently comparable to minimize differences in microchemistry due to ontogeny rather than environmental 
+history (Campana et al., 2000)."}
+
+4. **Could the manuscript benefit from additional tables or figures, or from improving or removing (some of the) existing ones?**
+
+**Reviewer #1**: *Yes, the manuscript can be improved by adding a more detailed table containing the spatial 
+representation of the samples.*
+
+\textcolor{blue}{Thank you for this recommendation. We updated Table 1 so it now shows the data broken down by sampling area.}
+
+
+**Reviewer #2**: *see comments*
+
+\textcolor{blue}{Please see responses in section 2.2 of this document.}
+
+5. **If applicable, are the interpretation of results and study conclusions supported by the data?**
+
+**Reviewer #1**: 
+*Not all of them. Authors need to clarify several points, as indicated in my letter for the authors.*
+
+\textcolor{blue}{Please see responses in section 2.2 of this document.}
+
+**Reviewer #2**:
+*see comments*
+
+\textcolor{blue}{Please see responses in section 2.2 of this document.}
+
+6. **Have the authors clearly emphasized the strengths of their study/theory/methods/argument?**
+
+**Reviewer #1**: *No, some points were superficially explained.*
+
+\textcolor{blue}{Please see responses in section 2.2 of this document.}
+
+**Reviewer #2**: *see comments*
+
+\textcolor{blue}{Please see responses in section 2.2 of this document.}
+
+7. **Have the authors clearly stated the limitations of their study/theory/methods/argument?**
+
+**Reviewer #1**: *In a very superficial way. 
+If the authors follow my tips, they can find a new way to discuss the results and properly state the limitations.*
+
+\textcolor{blue}{Please see responses in section 2.2 of this document.}
+
+**Reviewer #2**: see comments
+
+\textcolor{blue}{Please see responses in section 2.2 of this document.}
+
+8. **Does the manuscript structure, flow or writing need improving (e.g., the addition of subheadings, shortening of text, reorganization of sections, or moving details from one section to another)?**
+
+\textcolor{blue}{No comments to address.}
+
+9. **Could the manuscript benefit from language editing?**
+
+\textcolor{blue}{No comments to address.}
+
+## Additional Review Comments
+
+### Reviewer #1
+
+*The work brings interesting information about an already heavily impacted species using a non-lethal methodology, 
+avoiding the addition of an alternative impacting source.*
+
+*However, despite the merits of the idea developed, many flaws were perceived, and many statements were made without proper support from the results. 
+However, I think these are problems that are possible to work around.*
+
+*My review of the manuscript, at least at this stage, will focused on the discussion section. Meeting the necessary changes posed here 
+will necessarily require changes in materials and methods and results sections.*
+
+\textcolor{blue}{Thank you for your thorough review and numerous suggestions and paper recommendations. Below, you will find
+our responses to your specific comments. We would also note that we rewrote most of the Discussion so that each elemental ratio
+is discussed more thoroughly to provide the reader with more context of how these findings relate to the otolith/fin-spine microchemistry literature,
+the Caspian Sea environment, and the life history of these fish.
+Your comments were very helpful in guiding this process.}
+
+*Page 7. Line 36. A permutational ANOVA (PERMANOVA) (Oksanen et al. 2022) was previously used by Soeth et al. 2019 and Schroeder et al. 2022. 
+Authors can exchange Quinn and Keough 2002 for these two references, that are almost two decades newer.*
+
+* *Soeth, M., Spach, H.L., Daros, F.A., Adelir-Alves, J., Almeida, A.C.O., Correia, A.T., 2019. 
+Stock structure of Atlantic Spadefish Chaetodipterus faber from Southwest Atlantic Ocean inferred from otolith elemental and shape signatures. 
+Fish. Res. 211, 81–90. https://doi.org/10.1016/j.fishres.2018.11.003. *
+
+* *Schroeder, R.; Schwingel, P.R.; Pinto, E.; Almeida, A. & Correia, A.T. 2022. 
+Stock structure of the Brazilian sardine Sardinella brasiliensis from Southwest Atlantic Ocean inferred from otolith elemental signatures. Fisheries Research 248, 
+106192.*
+
+\textcolor{blue}{We updated the text to include the suggested references.}
+
+*Page 15, Line 19. In the discussion section, authors point out that there are not life-history parameters literatures known for the species studied. 
+But authors themselves cited three published studies, one of them specifically highlighting Aspects of the life history of Acipenser stellatus:*
+
+* *Bakhshalizadeh, S., A. Bani, and S. Abdolmalaki. 2013a. Comparative morphology of the pectoral fin spine of the Persian sturgeon Acipenser persicus, the Russian sturgeon Acipenser gueldenstaedtii, and the starry sturgeon Acipenser stellatus in Iranian waters of the Caspian Sea. Acta Zoologica 94: 471–477. https://doi.org/10.1111/j.1463-6395.2012.00576.x*
+
+* *Bakhshalizadeh, S., Shahram Abdolmalaki, and A. Bani. 2012. Aspects of the life history of Acipenser stellatus (Acipenseriformes, Acipenseridae), the starry sturgeon, in Iranian waters of the Caspian Sea. aqua, International Journal of Ichthyology 18: 103–113.*
+
+* *Fadeyeva, T. A. 1981. The size-age composition ofthe caspian sevryuga, Acipenser stellatus, during the marine period of life. Journal of Ichthyology 21: 54–64.*
+
+\textcolor{blue}{We apologize that this statement was vague and even somewhat contradictory with other parts of the paper. We meant that the life history
+of this species is not known in sufficient detail across its range (or at least within the Caspian Sea) to explain all of our results with certainty. However, after
+further consideration, we decided that this statement does not add much to the paper, so we removed it rather than rewriting it, and refocused much of the 
+Discussion following your recommendations.}
+
+*Page 15, Line 21-24. Authors stated that: “microelements reflecting both environmental and biological factors differed in fin spines from fish collected in 
+different regions, suggesting that fish from the northern and southern Caspian Sea may differ across a suite of life-history factors, such as 
+habitat exploitation, growth, and/or feeding”; and this is ok, but in here two questions about habitat exploitation and feeding were arisen, and were 
+not properly answered in the following discussion.*
+
+\textcolor{blue}{Thank you for pointing this out. As written, this sentence creates an expectation for the reader that these points (i.e., 
+habitat exploitation, growth, and feeding) will be covered in the rest of paragraph. However, our discussion of these topics was too spread out and thin in some places,
+which you correctly pointed out. Therefore, we have removed this statement and instead tried to improve the organization of the Discussion section and provide 
+more substance for the reader based on your suggestions and some additional literature.}
+
+*Page 15, Line 37-40. Authors associated significantly lower of Ba/Ca ratios in males to the earlier off-shore movements of females (Bakhshalizadeh et al. 2017). 
+This is a very superficial affirmation. Authors did not define the age of the specimens nor even separate the place of the capture of males and females of the 
+south subpopulation-unit. There is a lot of environmental variability in the vicinity of the south stock *
+
+* *(Fallah, F. & Mansoury, D. 2022. Coastal upwelling by wind-driven forcing in the Caspian Sea: A numerical analysis. Oceanologia 64, 363—375). *
+
+More important, differences were detected between age0+ between the east and west portions of the south subpopulation-unit possibly related to the Ba spatial variability (Bakhshalizadeh et al 2017; Bakhshalizadeh et al 2021).
+ Moreover, there several sources of Ba. See Correia et al 2021. 
+
+* *(Correia, A.T., Moura, A., Triay-Portella, R., Santos, P.T., Pinto, E., Almeida, A.A., Sial, A.N., Muniz, A.A., 2021. Population structure of the chub mackerel 
+(Scomber colias) in the NE Atlantic inferred from otolith elemental and isotopic signatures. Fish. Res. 234, 105785 https://doi.org/10.1016/j.fishres.2020, 105785).*
+
+\textcolor{blue}{Thank you for your helpful comments regarding Ba/Ca as well as the useful references. Based on suggestions from
+another reviewer, we reran our univariate analyses using nonparametric tests. Our results were largely the same, except the
+significant main effect for sex in Ba/Ca disappeared. The interaction was still significant, however. Based on these
+changes to our results, as well as your comments, we wrote our discussion on Ba/Ca. We also advised caution in interpreting these
+particular results given our small sample size. The updated text reads as follows:}
+
+\textcolor{blue}{"Finally, Ba/Ca was the only elemental ratio that showed significant differences for the interaction between
+region and sex. Males in the south had significantly different values than males in the north and females
+in the south. Ba/Ca in calcified parts of fish is strongly correlated with water chemistry (Hüssy et al.,
+2020; Walther and Thorrold, 2006) and useful for indicating transitions from freshwater to marine water
+and vice versa (Hermann et al., 2016; McCulloch et al., 2005; Tabouret et al., 2010; Walther et al., 2011).
+Therefore, our results may reflect the earlier off-shore movements of females compared to males in the
+south (Bakhshalizadeh et al., 2017). Such differences may not have been observed in northern fish due to
+the similarities in near-shore and off-shore environments (i.e., relatively uniform, shallow depth across the
+northern basin; Fig. 1). These results should be approached with caution, however. The south Caspian Sea
+has considerable environmental variability (Fallah and Mansoury, 2022) and Ba can derive from numerous
+sources (Correia et al., 2021). Furthermore, differences in Ba/Ca have been observed between starry
+sturgeon from the eastern and western parts of the south Caspian Sea (Bakhshalizadeh et al., 2021a).
+Given our small sample size and uneven sampling between the southeastern and southwestern Caspian
+Sea (Table 1), it is uncertain whether this result was due to within-region variation in environmental Ba or
+fish behavior, or would disappear entirely with a larger sample size."}
+
+*One of them came from deep environments, which supports a spatial difference between east and west portions of the south subpopulation-unit, 
+and maybe two different nursery areas. One way to improve this is to present a detailed table with the spatial distributions of the samples 
+(i.e north, southE, southW) in the M&M section. 
+See Schroeder et al., 2022 as an example 
+
+* *(Schroeder, R.; Schwingel, P.R. & Correia, A.T. 2021. Population structure of the Brazilian 
+sardine (Sardinella brasiliensis) in the Southwest Atlantic inferred from body morphology and otolith shape signatures. 
+Hydrobiologia, https://doi.org/10.1007/s10750-021-04730-7).  *
+
+\textcolor{blue}{Thank you for this recommendation. We updated Table 1 so it now shows the data broken down by sampling area.}
+
+*Page 16, Line 17-21. “Sr and Ba in calcified structures have a relatively long history of use in elucidating fish life histories (Campana 1999; Elsdon et al. 2008)”. 
+There are several references about this. Please, insert one more at least.*
+
+\textcolor{blue}{We included a reference to the following review from 2020:}
+
+* Hüssy, K., Limburg, K.E., Pontual, H.D., Thomas, O.R.B., Cook, K., Heimbrand, Y., Blass, M., Sturrock, A.M., 2020. Trace element patterns in otoliths: the role of biomineralization. Reviews in Fisheries Science & Aquaculture.
+
+*Page 16, Line 26-31. Zn and Cu do can indicate waters concentrations in some cases as a result from the proximity anthropogenic effects. 
+See Arslan & Secor, 2005 for review.*
+
+* *(Arslan, Z., Secor, S.H., 2005. Analysis of trace transition elements and heavy metals in fish otoliths as tracers of habitat 
+use by American eels in the Hudson River estuary. Estuaries 28, 382-393)*
+
+*Zn can also be associated with feeding. Ranaldi & Gagnon, 2008* 
+
+* *(Ranaldi, M.M., Gagnon, M.M., 2008. Zinc incorporation in the otoliths of juvenile pink snapper 
+(Pagrus auratus Forster): the influence of dietary versus waterborne sources. Journal of Experimental Marine Biology and Ecology 360, 56-62. 
+https://doi.org/10.1016/j.jembe.2008.03.013).*
+
+\textcolor{blue}{Thank you for the suggested references. We rewrote the discussion regarding Zn and Cu based on your recommendations.
+The suggested references were included, as were a few others. The updated text reads as follows:}
+
+\textcolor{blue}{"In otoliths, both Zn and Cu likely reflect feeding and/or growth processes due to their physiological roles,
+rather than directly reflecting ambient water chemistry (Hüssy et al., 2020; Ranaldi and Gagnon, 2008;
+Thomas et al., 2017). Elevated otolith Zn/Ca and Cu/Ca has been associated with anthropogenic effects
+(Arslan and Secor, 2005), suggesting these elements may reflect pollutants from the environment obtained
+via prey items. Heidary et al. (2012) reported bioaccumulation of Zn and Cu in the tissues of starry sturgeon,
+while Bakhshalizadeh et al. (2023) found significantly higher heavy metals in fin spines of starry sturgeon
+from the north vs. those from the south. Exposure to pollutants may be higher in the north Caspian Sea due
+to the strong influence of the Volga and Ural rivers, thus explaining the elevated Zn/Ca and Cu/Ca observed
+in fin spines of northern starry sturgeon."}
+
+*Page 16, Line 31-33. There are several sources of Mn in the aquatic environment. One of them in from continental runoff. 
+Thus, the higher quantity of riverine inputs in such area may explain the spatial distribution of Mn/Ca ratios concentration in the northern sector are 
+significantly higher than the southern counterparts. See Schroeder et al 2022.*
+
+\textcolor{blue}{Similar to the other discussions of specific elements, we updated our discussion of Mn/Ca based on your comments:}
+
+\textcolor{blue}{"Mn concentration has been associated with anthropogenic influences on river inputs as well as estuarine processes in rivers during low flow 
+(Nelson and Powers, 2020; Schroeder et al., 2022). Mn/Ca in otoliths has also been used as a proxy for hypoxic conditions (Limburg et al., 2015, 2011), 
+which can occur when stratification occurs in estuaries (Nelson and Powers, 2020; Schroeder and Wiseman, 1999). 
+During the summer months, large areas of bottom water in the north Caspian Sea can have hypoxic conditions depending on annual flow conditions (Tuzhilkin et al., 2005).
+Therefore, the significant differences in fin-spine Mn/Ca observed here may have been due to the the heavy
+influence that river flow has on the physico-chemical conditions in the north basin (Tuzhilkin et al., 2005)."}
+
+### Reviewer #2
+
+*The manuscript aims to know the microchemistry of the bones of Caspian Sea sturgeons and discriminate stocks. 
+The work is about a species of sturgeon endangered by its relevance. However, they have methodological weaknesses.*
+
+***Introduction***
+
+*The authors should include the hypothesis of the manuscript and on which they base their assumption of the 
+existence of two groups one in the north and one in the south of the Caspian Sea. 
+Are there works using other methodologies for determining stocks of the species studied?*
+
+\textcolor{blue}{This was updated in the new manuscript. Please see our response to question 1 in section 2.1 of this document.} 
+
+*Authors should include a paragraph on the scope of the use of spine microchemistry. 
+For example, the resorption of spines..... what limitations does it have?
+In relation to the study of calcified structures and their limitations can review the work 
+(Avigliano et al, 2020, Frontiers in Marine Science, 7, 687)*
+
+\textcolor{blue}{This was updated in the new manuscript. Please see our response to question 1 in section 2.1 of this document.}
+
+***Materials and Methods***
+
+*2.3 Authors should include the N studied (line 49).*
+
+\textcolor{blue}{This was updated in the new manuscript. Please see our response to question 3 in section 2.1 of this document.}
+
+*The authors should explain in detail the preparation of the spines for determinations with ICPMs (lines 55-61).*
+
+\textcolor{blue}{This was updated in the new manuscript. Please see our response to question 3 in section 2.1 of this document.}
+
+*How was the age of the specimens determined?*
+
+\textcolor{blue}{This was updated in the new manuscript. Please see our response to question 3 in section 2.1 of this document.}
+
+*2.4. The authors must support this sentence (Lines 20-22).*
+
+*What studies did the authors conduct to say that there are significant differences in TL of fish? 
+What statistical tests did they use and how?*
+
+\textcolor{blue}{This was updated in the new manuscript. Please see our response to question 3 in section 2.1 of this document.}
+
+***Results***
+
+*Contractions of spine elements were measured as total concentrations? Or the age of the specimens was 
+considered and a transept of the spine was measured. This is important because if total concentrations of fish of different 
+ages were compared, the results are not comparable.*
+
+\textcolor{blue}{The study was based on whole samples rather than transects due to equipment availability. Age varied somewhat from fish to fish,
+but not significantly between regions (Mann–Whitney U test, `r in_text_pval(age_u_test_res$p)`). Furthermore, there was no significant difference in total length 
+between regions (Mann–Whitney U test, `r in_text_pval(length_u_test_res$p)`). There was also no significant difference in male:female ratio between regions 
+(two-sided proportion test, `r in_text_pval(sex_prop_test$p_value)`). Therefore, we considered the groups sufficiently similar for comparing whole fin-spine 
+microchemistry. We included additional details about this in the updated manuscript (please also see our response to question 3 and page 7, lines 136-141 of the
+revised manuscript).}
+
+*Table 1. TL must be included.*
+
+\textcolor{blue}{We updated the table column name to "Total length (cm)"}
+
+*Table 2. The assumptions of the ANOVA were checked ¿ If so include the results of the tests for normality and homocedacy.*
+
+\textcolor{blue}{We checked the data again. Most elements followed the assumptions for ANOVA. 
+However, some did not, even with various transformations. Therefore, we used the Scheirer–Ray–Hare extension of the Kruskal–Wallis test instead of two-way ANOVA.
+ We used Dunn's test for multiple comparisons instead of Tukey's. We updated the text accordingly:}
+
+\textcolor{blue}{"Some elemental ratios failed the assumption of normality (both transformed and log-transformed) for two-way analysis of variance
+(ANOVA). Therefore, we used a non-parametric alternative, the Scheirer–Ray–Hare (SRH) extension of the
+Kruskal–Wallis test, to evaluate the effects of sex, region, and the interaction thereof on element-to-calcium
+ratios (Scheirer et al., 1976; Sokal and Rohlf, 1995). Dunn’s test for multiple comparisons was performed
+in the case of any significant interactions (Dunn, 1964)."}
+
+*Authors should include in the p-values *, in the case of significant differences.*
+
+\textcolor{blue}{We updated the figure following yur recommendation. P-values should now be easier for readers to see right away.}
+
+*The authors should clarify what biological significance PC3 and PC4 have in the PCA (lines382-38. Page 11).*
+
+\textcolor{blue}{We updated Figure 3 with a second panel showing the absolute values of contributions by elemental ratios to the first four principal components.
+Hopefully this makes the PCA results more clear.}
+
+*Figure 3. Males and females were grouped together, however, the authors had indicated that maturity was different. 
+Therefore, the strength of the results shown in this figure is not evident.*
+
+\textcolor{blue}{This is a good point. As we mentioned in responses to previous comments and questions, the age, sex composition, and length did not vary 
+significantly between different regions. Ideally, we would have used a larger sample size and included only fish of a particular age (rather than having some small 
+variability), but obtaining enough samples of these rare fish is a challenge. 
+We feel that these considerations were adequate to minimize the impacts of ontogeny (e.g., due to age or sex) on whole fin-spine microchemistry and explore differences 
+between regions. Based on your comments, we have tried to make these considerations more clear in the text. 
+Regarding this figure specifically, the strength of the results is supported by the considerations for group composition outlined above and 
+the PERMANOVA results (Table 3; i.e., there was no siginificant difference in centroids of sexes or the interaction for sex and region).}

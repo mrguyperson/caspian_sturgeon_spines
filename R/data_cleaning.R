@@ -11,8 +11,8 @@
 # data <- read_csv(path)
 
 # clean data --------------------------------------------------------------
-clean_raw_data <- function(path){
-  read_csv(path) %>%
+clean_raw_data <- function(raw_data){
+  raw_data %>%
     mutate(across(c(Ba:Fe), .fns = ~ .x / Ca * 1e3, .names = "{.col}_Ca"),
           Sr_Ba = Sr / Ba,
           Sex = case_when(Sex == 1 ~ "female",
